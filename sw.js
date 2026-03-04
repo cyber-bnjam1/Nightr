@@ -4,7 +4,7 @@ const ASSETS = [
 ‘/’, ‘/index.html’, ‘/style.css’, ‘/app.js’,
 ‘/page-events.js’, ‘/page-guests.js’, ‘/page-invitations.js’,
 ‘/page-contributions.js’, ‘/page-budget.js’, ‘/page-stats.js’,
-‘/page-ambiance.js’, ‘/page-settings.js’,
+‘/page-ambiance.js’, ‘/page-settings.js’, ‘/utils.js’,
 ‘/manifest.json’, ‘/nightr.png’
 ];
 
