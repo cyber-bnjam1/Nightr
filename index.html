@@ -31,6 +31,7 @@
         </svg>
         Continuer avec Google
       </button>
+      <button class="btn-demo" id="btn-demo-login">✨ Mode démo (sans compte)</button>
     </div>
   </div>
 
@@ -97,11 +98,17 @@
     const db = getFirestore(app);
     const provider = new GoogleAuthProvider();
 
+    import { getRedirectResult, signInWithRedirect }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
     window.__auth = auth;
     window.__db = db;
     window.__provider = provider;
-    window.__signInWithPopup = signInWithPopup;
     window.__signOut = signOut;
+    window.__signInWithRedirect = signInWithRedirect;
+
+    // Récupère le résultat du redirect Google si on revient d'une auth
+    getRedirectResult(auth).catch(() => {});
 
     window.dispatchEvent(new Event("firebase-ready"));
     onAuthStateChanged(auth, (user) => {
