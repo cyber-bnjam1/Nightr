@@ -1,5 +1,5 @@
 // ===== page-settings.js =====
-import { dbGet, showToast } from ‘./app.js’;
+import { dbGet, dbSet, dbDelete, showToast } from ‘./utils.js’;
 
 let container;
 
@@ -16,17 +16,20 @@ container.innerHTML = `
 ```
 <div class="glass-card" style="margin-bottom:16px">
   <div class="flex-row" style="gap:14px">
-    ${user?.photoURL ? `<img src="${user.photoURL}" style="width:56px;height:56px;border-radius:50%;object-fit:cover" />` :
-      `<div class="list-avatar" style="width:56px;height:56px;font-size:22px">${(user?.displayName||'U')[0]}</div>`}
+    ${user?.photoURL
+      ? `<img src="${user.photoURL}" style="width:56px;height:56px;border-radius:50%;object-fit:cover" />`
+      : `<div class="list-avatar" style="width:56px;height:56px;font-size:22px">${(user?.displayName||'U')[0]}</div>`}
     <div>
       <div style="font-size:17px;font-weight:700">${user?.displayName || 'Utilisateur'}</div>
       <div style="font-size:13px;color:var(--text-muted)">${user?.email || ''}</div>
-      <div style="font-size:12px;color:var(--accent);margin-top:2px">Compte Google connecté ✓</div>
+      <div style="font-size:12px;color:var(--accent);margin-top:2px">
+        ${user?.isDemo ? '⚡ Mode démo — données locales' : 'Compte Google connecté ✓'}
+      </div>
     </div>
   </div>
 </div>
 
-<div style="font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;margin-left:4px">Apparence</div>
+<div class="settings-label">Apparence</div>
 <div class="glass-card" style="margin-bottom:16px">
   <div class="flex-between" style="padding:4px 0">
     <div>
@@ -39,7 +42,7 @@ container.innerHTML = `
   </div>
 </div>
 
-<div style="font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;margin-left:4px">Notifications</div>
+<div class="settings-label">Notifications</div>
 <div class="glass-card" style="margin-bottom:16px">
   <div class="flex-between" style="padding:8px 0;border-bottom:1px solid var(--glass-border)">
     <div>
@@ -57,12 +60,14 @@ container.innerHTML = `
   </div>
 </div>
 
-<div style="font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;margin-left:4px">Données</div>
+<div class="settings-label">Données</div>
 <div class="glass-card" style="margin-bottom:16px">
   <div class="flex-between" style="padding:8px 0;border-bottom:1px solid var(--glass-border)">
     <div>
       <div style="font-weight:600">Sauvegarde automatique</div>
-      <div style="font-size:13px;color:var(--accent)">✓ Firebase Firestore activé</div>
+      <div style="font-size:13px;color:${user?.isDemo ? '#fbbf24' : 'var(--accent)'}">
+        ${user?.isDemo ? '⚡ localStorage (mode démo)' : '✓ Firebase Firestore'}
+      </div>
     </div>
     <span class="badge badge-yes">Actif</span>
   </div>
@@ -74,7 +79,7 @@ container.innerHTML = `
   </div>
 </div>
 
-<div style="font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;margin-left:4px">À propos</div>
+<div class="settings-label">À propos</div>
 <div class="glass-card" style="margin-bottom:20px">
   <div class="flex-between" style="padding:6px 0;border-bottom:1px solid var(--glass-border)">
     <span style="color:var(--text-muted)">Version</span><span style="font-weight:600">1.0.0</span>
@@ -83,11 +88,14 @@ container.innerHTML = `
     <span style="color:var(--text-muted)">App</span><span style="font-weight:600">Nightr</span>
   </div>
   <div class="flex-between" style="padding:6px 0">
-    <span style="color:var(--text-muted)">Stockage</span><span style="font-weight:600">Firebase + Offline</span>
+    <span style="color:var(--text-muted)">Stockage</span>
+    <span style="font-weight:600">${user?.isDemo ? 'localStorage' : 'Firebase + Offline'}</span>
   </div>
 </div>
 
-<button class="btn btn-danger btn-full" id="btn-logout-settings" style="margin-bottom:40px">🚪 Se déconnecter</button>
+<button class="btn btn-danger btn-full" id="btn-logout-settings" style="margin-bottom:40px">
+  🚪 Se déconnecter
+</button>
 ```
 
 `;
@@ -106,15 +114,27 @@ deleteAllData();
 }
 };
 document.getElementById(‘btn-logout-settings’).onclick = async () => {
+if (window.__demoMode) {
+window.__demoMode = false;
+window.__currentUser = null;
+document.getElementById(‘app-screen’).classList.remove(‘active’);
+document.getElementById(‘auth-screen’).classList.add(‘active’);
+return;
+}
 await window.__signOut(window.__auth);
 };
 }
 
 async function exportAllData() {
 const [events, guests, expenses, contributions, ambiance] = await Promise.all([
-dbGet(‘events’), dbGet(‘guests’), dbGet(‘expenses’), dbGet(‘contributions’), dbGet(‘ambiance’)
+dbGet(‘events’), dbGet(‘guests’), dbGet(‘expenses’),
+dbGet(‘contributions’), dbGet(‘ambiance’)
 ]);
-const data = { exportedAt: new Date().toISOString(), user: window.__currentUser?.email, events, guests, expenses, contributions, ambiance };
+const data = {
+exportedAt: new Date().toISOString(),
+user: window.__currentUser?.email,
+events, guests, expenses, contributions, ambiance
+};
 const blob = new Blob([JSON.stringify(data, null, 2)], { type: ‘application/json’ });
 const a = document.createElement(‘a’);
 a.href = URL.createObjectURL(blob);
@@ -124,21 +144,10 @@ showToast(‘Export téléchargé ✓’);
 }
 
 async function deleteAllData() {
-const { getDocs, collection, deleteDoc, doc } = await import(“https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js”);
-const uid = window.__currentUser?.uid;
-if (!uid) return;
 const cols = [‘events’, ‘guests’, ‘expenses’, ‘contributions’, ‘ambiance’];
 for (const col of cols) {
-const snap = await getDocs(collection(window.__db, `users/${uid}/${col}`));
-for (const d of snap.docs) await deleteDoc(doc(window.__db, `users/${uid}/${col}`, d.id));
+const items = await dbGet(col);
+for (const item of items) await dbDelete(col, item.id);
 }
 showToast(‘Données supprimées’);
-}
-
-async function dbGet(col) {
-const { getDocs, collection } = await import(“https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js”);
-const uid = window.__currentUser?.uid;
-if (!uid) return [];
-const snap = await getDocs(collection(window.__db, `users/${uid}/${col}`));
-return snap.docs.map(d => ({ id: d.id, …d.data() }));
 }
