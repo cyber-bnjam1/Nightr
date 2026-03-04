@@ -1,0 +1,16 @@
+{
+  "name": "Nightr",
+  "short_name": "Nightr",
+  "description": "Organisez vos soirées légendaires",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#06060f",
+  "theme_color": "#06060f",
+  "icons": [
+    { "src": "nightr.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "nightr.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "categories": ["lifestyle", "social"],
+  "lang": "fr"
+}

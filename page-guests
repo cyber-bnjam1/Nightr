@@ -1,0 +1,112 @@
+// ===== page-guests.js =====
+import { dbGet, dbSet, dbDelete, genId, showToast, openModal, closeModal } from ‘./app.js’;
+
+let guests = [];
+let events = [];
+let container;
+let filterStatus = ‘all’;
+let filterGroup = ‘all’;
+
+export async function renderGuests(el) {
+container = el;
+[guests, events] = await Promise.all([dbGet(‘guests’), dbGet(‘events’)]);
+draw();
+}
+
+function draw() {
+const groups = […new Set(guests.map(g => g.group).filter(Boolean))];
+const filtered = guests.filter(g => {
+if (filterStatus !== ‘all’ && g.rsvp !== filterStatus) return false;
+if (filterGroup !== ‘all’ && g.group !== filterGroup) return false;
+return true;
+});
+
+const counts = {
+yes: guests.filter(g => g.rsvp === ‘yes’).length,
+no: guests.filter(g => g.rsvp === ‘no’).length,
+wait: guests.filter(g => !g.rsvp || g.rsvp === ‘wait’).length,
+};
+
+container.innerHTML = `<h2 class="section-title">👥 Invités</h2> <div class="stat-grid" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:16px"> <div class="stat-card" style="cursor:pointer" data-filter-status="yes"> <div class="stat-value" style="color:#4ade80">${counts.yes}</div> <div class="stat-label">✅ Présents</div> </div> <div class="stat-card" style="cursor:pointer" data-filter-status="no"> <div class="stat-value" style="color:#f87171">${counts.no}</div> <div class="stat-label">❌ Absents</div> </div> <div class="stat-card" style="cursor:pointer" data-filter-status="wait"> <div class="stat-value" style="color:#fbbf24">${counts.wait}</div> <div class="stat-label">⏳ En attente</div> </div> </div> ${groups.length > 0 ?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+<button class="btn btn-sm ${filterGroup==='all'?'btn-primary':'btn-secondary'}" data-fg="all">Tous</button>
+${groups.map(g => `<button class="btn btn-sm ${filterGroup===g?'btn-primary':'btn-secondary'}" data-fg="${g}">${g}</button>`).join(’’)}
+</div>`: ''} ${filtered.length === 0 ?`<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">Aucun invité</div><div class="empty-sub">Ajoute tes premiers invités</div></div>`: filtered.map(guestItem).join('')} <div style="height:80px"></div> <button class="fab" id="fab-add-guest">+</button>`;
+
+container.querySelectorAll(’[data-filter-status]’).forEach(el =>
+el.addEventListener(‘click’, () => { filterStatus = filterStatus === el.dataset.filterStatus ? ‘all’ : el.dataset.filterStatus; draw(); }));
+container.querySelectorAll(’[data-fg]’).forEach(el =>
+el.addEventListener(‘click’, () => { filterGroup = el.dataset.fg; draw(); }));
+filtered.forEach(g => {
+container.querySelector(`[data-gid="${g.id}"]`)?.addEventListener(‘click’, () => openGuestDetail(g));
+});
+container.querySelector(’#fab-add-guest’).onclick = () => openGuestForm();
+}
+
+function guestItem(g) {
+const badgeMap = { yes: ‘<span class="badge badge-yes">✅ Oui</span>’, no: ‘<span class="badge badge-no">❌ Non</span>’, wait: ‘<span class="badge badge-wait">⏳ Attente</span>’ };
+const badge = badgeMap[g.rsvp] || badgeMap.wait;
+const initials = (g.name || ‘?’).split(’ ‘).map(n => n[0]).slice(0,2).join(’’).toUpperCase();
+return `<div class="list-item" data-gid="${g.id}"> <div class="list-avatar">${initials}</div> <div class="list-info"> <div class="list-name">${g.name} ${g.vip ? '<span class="badge badge-vip">⭐ VIP</span>' : ''}</div> <div class="list-sub">${g.phone || g.email || ''} ${g.group ?`· ${g.group}` : ''}</div> </div> <div>${badge}</div> </div>`;
+}
+
+function openGuestDetail(g) {
+const initials = (g.name || ‘?’).split(’ ‘).map(n => n[0]).slice(0,2).join(’’).toUpperCase();
+const rsvpOptions = [
+{ val: ‘yes’, label: ‘✅ Présent’, cls: ‘btn-primary’ },
+{ val: ‘no’, label: ‘❌ Absent’, cls: ‘btn-danger’ },
+{ val: ‘wait’, label: ‘⏳ Attente’, cls: ‘btn-secondary’ },
+];
+openModal(`<div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:20px"> <div class="list-avatar" style="width:72px;height:72px;font-size:28px">${initials}</div> <div style="font-size:22px;font-weight:700">${g.name} ${g.vip ? '⭐' : ''}</div> ${g.group ?`<span class="badge badge-accent">${g.group}</span>`: ''} </div> <div class="glass-card" style="margin-bottom:14px"> ${g.phone ?`<div class="flex-row"><span>📱</span><a href="tel:${g.phone}" style="color:var(--accent)">${g.phone}</a></div>`: ''} ${g.email ?`<div class="flex-row mt8"><span>📧</span><a href="mailto:${g.email}" style="color:var(--accent)">${g.email}</a></div>`: ''} ${g.note ?`<div class="mt8" style="color:var(--text-muted);font-size:14px">📝 ${g.note}</div>`: ''} </div> <div class="input-label" style="margin-bottom:8px">RSVP</div> <div style="display:flex;gap:8px;margin-bottom:16px"> ${rsvpOptions.map(r =>`<button class="btn ${r.val === g.rsvp ? r.cls : 'btn-secondary'} btn-sm" data-rsvp="${r.val}">${r.label}</button>`).join('')} </div> <div class="modal-actions"> <button class="btn btn-secondary" id="btn-edit-g">✏️ Modifier</button> <button class="btn btn-danger" id="btn-del-g">🗑️ Supprimer</button> </div> `);
+document.querySelectorAll(’[data-rsvp]’).forEach(btn => {
+btn.onclick = async () => {
+g.rsvp = btn.dataset.rsvp;
+await dbSet(‘guests’, g.id, g);
+guests = guests.map(x => x.id === g.id ? g : x);
+closeModal(); draw(); showToast(‘RSVP mis à jour ✓’);
+};
+});
+document.getElementById(‘btn-edit-g’).onclick = () => { closeModal(); openGuestForm(g); };
+document.getElementById(‘btn-del-g’).onclick = async () => {
+if (!confirm(‘Supprimer cet invité ?’)) return;
+await dbDelete(‘guests’, g.id);
+guests = guests.filter(x => x.id !== g.id);
+closeModal(); draw(); showToast(‘Invité supprimé’);
+};
+}
+
+function openGuestForm(g = null) {
+const isEdit = !!g;
+openModal(`<div class="modal-title">${isEdit ? 'Modifier' : 'Ajouter'} un invité</div> <div class="input-group"><label class="input-label">Nom *</label> <input class="input-field" id="g-name" placeholder="Prénom Nom" value="${g?.name || ''}" /></div> <div class="input-group"><label class="input-label">Téléphone</label> <input class="input-field" id="g-phone" type="tel" placeholder="+33 6 00 00 00 00" value="${g?.phone || ''}" /></div> <div class="input-group"><label class="input-label">Email</label> <input class="input-field" id="g-email" type="email" placeholder="email@exemple.com" value="${g?.email || ''}" /></div> <div class="input-group"><label class="input-label">Groupe</label> <input class="input-field" id="g-group" placeholder="Amis, Famille, Collègues…" value="${g?.group || ''}" /></div> <div class="input-group"><label class="input-label">RSVP</label> <select class="select-field" id="g-rsvp"> <option value="wait" ${g?.rsvp==='wait'||!g?.rsvp?'selected':''}>⏳ En attente</option> <option value="yes" ${g?.rsvp==='yes'?'selected':''}>✅ Présent</option> <option value="no" ${g?.rsvp==='no'?'selected':''}>❌ Absent</option> </select></div> <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"> <input type="checkbox" id="g-vip" ${g?.vip?'checked':''} style="width:20px;height:20px;accent-color:var(--accent)" /> <label for="g-vip" style="font-size:15px">⭐ VIP</label> </div> <div class="input-group"><label class="input-label">Note privée</label> <textarea class="textarea-field" id="g-note" placeholder="Notes sur cet invité…">${g?.note || ''}</textarea></div> <div class="modal-actions"> <button class="btn btn-primary btn-full" id="btn-save-g">💾 ${isEdit ? 'Enregistrer' : 'Ajouter'}</button> </div> ${!isEdit ?`<button class="btn btn-secondary btn-full mt8" id="btn-contact-picker">📱 Importer depuis Contacts</button>`: ''}`);
+
+if (!isEdit && ‘contacts’ in navigator) {
+document.getElementById(‘btn-contact-picker’)?.addEventListener(‘click’, async () => {
+try {
+const contacts = await navigator.contacts.select([‘name’, ‘tel’, ‘email’], { multiple: false });
+if (contacts.length) {
+const c = contacts[0];
+document.getElementById(‘g-name’).value = c.name?.[0] || ‘’;
+document.getElementById(‘g-phone’).value = c.tel?.[0] || ‘’;
+document.getElementById(‘g-email’).value = c.email?.[0] || ‘’;
+}
+} catch { showToast(‘Accès contacts refusé’); }
+});
+}
+
+document.getElementById(‘btn-save-g’).onclick = async () => {
+const name = document.getElementById(‘g-name’).value.trim();
+if (!name) { showToast(‘Nom requis’); return; }
+const data = {
+name, phone: document.getElementById(‘g-phone’).value,
+email: document.getElementById(‘g-email’).value,
+group: document.getElementById(‘g-group’).value,
+rsvp: document.getElementById(‘g-rsvp’).value,
+vip: document.getElementById(‘g-vip’).checked,
+note: document.getElementById(‘g-note’).value,
+id: g?.id || genId(),
+};
+await dbSet(‘guests’, data.id, data);
+if (isEdit) guests = guests.map(x => x.id === data.id ? data : x);
+else guests.push(data);
+closeModal(); draw(); showToast(isEdit ? ‘Invité modifié ✓’ : ‘Invité ajouté ✓’);
+};
+}
