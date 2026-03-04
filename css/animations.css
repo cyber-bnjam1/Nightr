@@ -1,0 +1,162 @@
+/* ============================================================
+   NIGHTR — Animations & Transitions
+   ============================================================ */
+
+/* ── Orb Floats ── */
+@keyframes orbFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(-40px, 30px) scale(1.05); }
+  66%       { transform: translate(20px, -20px) scale(0.95); }
+}
+@keyframes orbFloat2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%       { transform: translate(60px, -40px) scale(1.08); }
+}
+@keyframes orbFloat3 {
+  0%, 100% { transform: translate(0, 0); opacity: 0.12; }
+  50%       { transform: translate(-30px, 20px); opacity: 0.18; }
+}
+
+/* ── Pulse (loading) ── */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.1); opacity: 0.7; }
+}
+
+/* ── Toast ── */
+@keyframes toastIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+@keyframes toastOut {
+  from { transform: translateY(0); opacity: 1; }
+  to   { transform: translateY(10px); opacity: 0; }
+}
+
+/* ── View Transitions ── */
+@keyframes viewIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.view-enter { animation: viewIn 0.35s var(--ease-spring) both; }
+
+/* ── Card Hover Glow ── */
+@keyframes cardGlow {
+  0%, 100% { box-shadow: var(--glass-shadow); }
+  50%       { box-shadow: var(--glass-shadow), 0 0 24px rgba(124,58,237,0.15); }
+}
+
+/* ── Stagger Children ── */
+.stagger > * { animation: viewIn 0.4s var(--ease-spring) both; }
+.stagger > *:nth-child(1)  { animation-delay: 0ms;   }
+.stagger > *:nth-child(2)  { animation-delay: 60ms;  }
+.stagger > *:nth-child(3)  { animation-delay: 120ms; }
+.stagger > *:nth-child(4)  { animation-delay: 180ms; }
+.stagger > *:nth-child(5)  { animation-delay: 240ms; }
+.stagger > *:nth-child(6)  { animation-delay: 300ms; }
+.stagger > *:nth-child(7)  { animation-delay: 360ms; }
+.stagger > *:nth-child(8)  { animation-delay: 420ms; }
+.stagger > *:nth-child(n+9){ animation-delay: 480ms; }
+
+/* ── Shimmer (skeleton) ── */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.skeleton {
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.04) 0%,
+    rgba(255,255,255,0.09) 50%,
+    rgba(255,255,255,0.04) 100%
+  );
+  background-size: 200% auto;
+  animation: shimmer 1.6s linear infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* ── QR Code scan line ── */
+@keyframes scanLine {
+  0%   { top: 10%; }
+  100% { top: 90%; }
+}
+.qr-scan-line {
+  position: absolute;
+  left: 10%; right: 10%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--purple-glow), var(--pink-accent), var(--purple-glow), transparent);
+  border-radius: var(--radius-full);
+  box-shadow: 0 0 12px var(--purple-glow);
+  animation: scanLine 2s ease-in-out infinite alternate;
+}
+
+/* ── Countdown pulse ── */
+@keyframes countPulse {
+  0%, 100% { text-shadow: 0 0 0 transparent; }
+  50%       { text-shadow: 0 0 20px var(--purple-glow); }
+}
+.countdown-value {
+  animation: countPulse 3s ease-in-out infinite;
+}
+
+/* ── Check bounce ── */
+@keyframes checkBounce {
+  0%   { transform: scale(0); }
+  60%  { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+.check-enter { animation: checkBounce 0.4s var(--ease-spring) both; }
+
+/* ── Floating Action Button ── */
+.fab {
+  position: fixed;
+  bottom: calc(24px + var(--safe-bottom));
+  right: 20px;
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--purple-core), var(--pink-accent));
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(124,58,237,0.5), 0 2px 8px rgba(0,0,0,0.3);
+  cursor: pointer;
+  z-index: 50;
+  transition: all 0.25s var(--ease-spring);
+}
+.fab:active { transform: scale(0.9); }
+.fab svg { transition: transform 0.3s var(--ease-spring); }
+.fab.rotated svg { transform: rotate(45deg); }
+
+/* ── Hero Event Card ── */
+.hero-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  margin-bottom: 24px;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.hero-card-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(135deg, rgba(124,58,237,0.6) 0%, rgba(236,72,153,0.5) 50%, rgba(59,130,246,0.4) 100%);
+}
+.hero-card-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 60%);
+}
+.hero-noise {
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+}
+.hero-content { position: relative; z-index: 1; }
