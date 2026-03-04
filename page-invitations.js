@@ -19,8 +19,7 @@ container.querySelector(`[data-evid="${ev.id}"]`)?.addEventListener(‘click’,
 }
 
 function invitationCard(ev) {
-const evGuests = guests.filter(g => g.rsvp === ‘yes’);
-return ` <div class="glass-card" data-evid="${ev.id}" style="margin-bottom:12px;cursor:pointer"> <div class="flex-between"> <div> <div style="font-size:17px;font-weight:700">${ev.name}</div> <div style="font-size:13px;color:var(--text-muted)">${ev.date ? formatDate(ev.date) : 'Date à définir'} ${ev.location ? '· '+ev.location : ''}</div> </div> <div style="font-size:28px">💌</div> </div> <div class="sep"></div> <div style="display:flex;gap:12px"> <button class="btn btn-sm btn-primary" data-action="qr" data-evid="${ev.id}">📱 QR Code</button> <button class="btn btn-sm btn-secondary" data-action="preview" data-evid="${ev.id}">👁️ Aperçu</button> <button class="btn btn-sm btn-secondary" data-action="share" data-evid="${ev.id}">📤 Partager</button> </div> </div>`;
+return ` <div class="glass-card" style="margin-bottom:12px"> <div class="flex-between"> <div> <div style="font-size:17px;font-weight:700">${ev.name}</div> <div style="font-size:13px;color:var(--text-muted)">${ev.date ? formatDate(ev.date) : 'Date à définir'} ${ev.location ? '· '+ev.location : ''}</div> </div> <div style="font-size:28px">💌</div> </div> <div class="sep"></div> <div style="display:flex;gap:8px;flex-wrap:wrap"> <button class="btn btn-sm btn-primary inv-qr" data-evid="${ev.id}">📱 QR Code</button> <button class="btn btn-sm btn-secondary inv-preview" data-evid="${ev.id}">👁️ Aperçu</button> <button class="btn btn-sm btn-secondary inv-share" data-evid="${ev.id}">📤 Partager</button> </div> </div>`;
 }
 
 function openInvitation(ev) {
@@ -108,19 +107,3 @@ if (!dateStr) return ‘’;
 const d = new Date(dateStr + ‘T00:00:00’);
 return d.toLocaleDateString(‘fr-FR’, { weekday: ‘long’, day: ‘numeric’, month: ‘long’, year: ‘numeric’ });
 }
-
-// Handle button clicks inside cards
-document.addEventListener(‘click’, (e) => {
-const btn = e.target.closest(’[data-action]’);
-if (!btn) return;
-const ev = events.find(x => x.id === btn.dataset.evid);
-if (!ev) return;
-e.stopPropagation();
-if (btn.dataset.action === ‘qr’) showQR(ev);
-if (btn.dataset.action === ‘preview’) showPreview(ev);
-if (btn.dataset.action === ‘share’) {
-if (navigator.share) {
-navigator.share({ title: ev.name, text: buildInvitationText(ev), url: generateRSVPLink(ev) });
-} else shareWhatsApp(ev);
-}
-});
