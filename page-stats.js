@@ -1,5 +1,5 @@
 // ===== page-stats.js =====
-import { dbGet } from ‘./app.js’;
+import { dbGet } from ‘./utils.js’;
 
 let events = [], guests = [], expenses = [];
 let container;
