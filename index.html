@@ -12,6 +12,32 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="nightr.png" />
   <link rel="stylesheet" href="style.css" />
+
+  <style>
+    /* CSS de secours si style.css ne charge pas */
+    body { background: #06060f; color: #f0f0ff; font-family: -apple-system, sans-serif; margin: 0; }
+    .screen { display: none; position: fixed; inset: 0; }
+    .screen.active { display: flex; flex-direction: column; }
+    .auth-content {
+      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 16px; padding: 40px 32px;
+      background: radial-gradient(ellipse at 30% 20%, #3b1f6e, transparent 60%), #06060f;
+    }
+    .logo-text { font-size: 52px; font-weight: 700; margin: 0;
+      background: linear-gradient(135deg, #fff, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .logo-sub { color: rgba(240,240,255,0.5); font-size: 15px; margin: 0; }
+    .auth-img { width: 96px; height: 96px; border-radius: 24px; }
+    .btn-google {
+      display: flex; align-items: center; gap: 12px; padding: 16px 28px;
+      border-radius: 50px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+      color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; width: 260px; justify-content: center;
+    }
+    .btn-demo {
+      background: none; border: 1px solid rgba(255,255,255,0.15); border-radius: 50px;
+      color: rgba(240,240,255,0.5); font-size: 14px; padding: 13px 28px; cursor: pointer; width: 260px;
+    }
+  </style>
+
 </head>
 <body>
   <div id="auth-screen" class="screen active">
@@ -78,10 +104,14 @@
   <div id="toast" class="toast"></div>
   <div id="modal-overlay" class="modal-overlay"></div>
 
+  <!-- Firebase (chargé en premier, bloquant) -->
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
-      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import {
+      getAuth, GoogleAuthProvider, signInWithRedirect,
+      getRedirectResult, signOut, onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const FIREBASE_CONFIG = {
@@ -98,26 +128,25 @@
     const db = getFirestore(app);
     const provider = new GoogleAuthProvider();
 
-    import { getRedirectResult, signInWithRedirect }
-      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
     window.__auth = auth;
     window.__db = db;
     window.__provider = provider;
     window.__signOut = signOut;
     window.__signInWithRedirect = signInWithRedirect;
 
-    // Récupère le résultat du redirect Google si on revient d'une auth
     getRedirectResult(auth).catch(() => {});
 
-    window.dispatchEvent(new Event("firebase-ready"));
     onAuthStateChanged(auth, (user) => {
       window.__currentUser = user;
       window.dispatchEvent(new CustomEvent("auth-changed", { detail: user }));
     });
+
+    window.dispatchEvent(new Event("firebase-ready"));
   </script>
 
-  <script src="app.js" type="module"></script>
+  <!-- App (chargé après Firebase) -->
+
+  <script type="module" src="app.js"></script>
 
 </body>
 </html>
