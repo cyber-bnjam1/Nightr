@@ -83,15 +83,14 @@
       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // ⚠️ Remplace ces valeurs par ta config Firebase
-    const firebaseConfig = {
-    apiKey: "AIzaSyCR3A1Rfd08MdnSAVKcMFZh1mApCnt_dL0",
-    authDomain: "nightr-48fd7.firebaseapp.com",
-    projectId: "nightr-48fd7",
-    storageBucket: "nightr-48fd7.firebasestorage.app",
-    messagingSenderId: "781987170518",
-    appId: "1:781987170518:web:5b49f4958b0ac313e1a177"
-  };
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyCR3A1Rfd08MdnSAVKcMFZh1mApCnt_dL0",
+      authDomain: "nightr-48fd7.firebaseapp.com",
+      projectId: "nightr-48fd7",
+      storageBucket: "nightr-48fd7.firebasestorage.app",
+      messagingSenderId: "781987170518",
+      appId: "1:781987170518:web:5b49f4958b0ac313e1a177"
+    };
 
     const app = initializeApp(FIREBASE_CONFIG);
     const auth = getAuth(app);
