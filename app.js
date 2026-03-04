@@ -69,26 +69,50 @@ document.getElementById(‘menu-overlay’).classList.remove(‘active’);
 document.getElementById(‘burger-btn’).classList.remove(‘open’);
 }
 
-// ===== DB HELPERS (Firestore) =====
+// ===== DB HELPERS =====
+// En mode démo : localStorage. En mode connecté : Firestore.
+
+function demoKey(collection) {
+return `nightr_demo_${collection}`;
+}
+
 export async function dbGet(collection) {
+if (window.__demoMode) {
+return JSON.parse(localStorage.getItem(demoKey(collection)) || ‘[]’);
+}
 const { getDocs, collection: col } = await import(“https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js”);
 const uid = window.__currentUser?.uid;
 if (!uid) return [];
 const snap = await getDocs(col(window.__db, `users/${uid}/${collection}`));
 return snap.docs.map(d => ({ id: d.id, …d.data() }));
 }
+
 export async function dbSet(collection, id, data) {
+if (window.__demoMode) {
+const all = JSON.parse(localStorage.getItem(demoKey(collection)) || ‘[]’);
+const idx = all.findIndex(x => x.id === id);
+if (idx >= 0) all[idx] = data; else all.push(data);
+localStorage.setItem(demoKey(collection), JSON.stringify(all));
+return;
+}
 const { doc, setDoc } = await import(“https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js”);
 const uid = window.__currentUser?.uid;
 if (!uid) return;
 await setDoc(doc(window.__db, `users/${uid}/${collection}`, id), { …data, updatedAt: Date.now() });
 }
+
 export async function dbDelete(collection, id) {
+if (window.__demoMode) {
+const all = JSON.parse(localStorage.getItem(demoKey(collection)) || ‘[]’);
+localStorage.setItem(demoKey(collection), JSON.stringify(all.filter(x => x.id !== id)));
+return;
+}
 const { doc, deleteDoc } = await import(“https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js”);
 const uid = window.__currentUser?.uid;
 if (!uid) return;
 await deleteDoc(doc(window.__db, `users/${uid}/${collection}`, id));
 }
+
 export function genId() {
 return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
@@ -139,12 +163,26 @@ document.getElementById(‘auth-screen’).classList.add(‘active’);
 }
 });
 
+// Connexion Google via redirect (fonctionne sur Koder + Vercel)
 document.getElementById(‘btn-google-login’).addEventListener(‘click’, async () => {
 try {
-await window.__signInWithPopup(window.__auth, window.__provider);
+await window.__signInWithRedirect(window.__auth, window.__provider);
 } catch (err) {
-showToast(’Connexion échouée : ’ + err.message);
+showToast(’Erreur : ’ + err.message);
 }
+});
+
+// Mode démo — faux utilisateur local, données en localStorage
+document.getElementById(‘btn-demo-login’).addEventListener(‘click’, () => {
+window.__currentUser = {
+uid: ‘demo-user’,
+displayName: ‘Mode Démo’,
+email: ‘demo@nightr.app’,
+photoURL: null,
+isDemo: true,
+};
+window.__demoMode = true;
+initApp(window.__currentUser);
 });
 });
 
