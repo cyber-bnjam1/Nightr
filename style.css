@@ -453,3 +453,16 @@ html, body {
 
 /* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar { width: 0; }
+
+/* ===== SETTINGS LABEL ===== */
+.settings-section-label {
+  font-size: 12px; font-weight: 700; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.8px;
+  margin: 0 4px 8px; 
+}
+
+/* ===== APP SCREEN always visible ===== */
+#app-screen {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+}
