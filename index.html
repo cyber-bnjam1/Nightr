@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Nightr" />
+  <meta name="theme-color" content="#0a0a0f" />
+  <title>Nightr</title>
+
+  <!-- PWA Manifest -->
+
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Fonts -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+
+  <!-- Styles -->
+
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+
+  <!-- Firebase SDK -->
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import FIREBASE_CONFIG from './firebase-config.js';
+    const app = initializeApp(FIREBASE_CONFIG);
+    window.__firebaseApp = app;
+    window.__db = getFirestore(app);
+    window.__auth = getAuth(app);
+    // Start app once Firebase is ready
+    import('./js/app.js');
+  </script>
+
+</head>
+<body>
+
+  <!-- Ambient background orbs -->
+
+  <div class="bg-orbs" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <!-- App Shell -->
+
+  <div id="app" class="app-shell">
+
+```
+<!-- Header -->
+<header class="app-header glass-header" id="appHeader">
+  <div class="header-inner">
+    <div class="header-left">
+      <button class="burger-btn glass-btn" id="burgerBtn" aria-label="Menu">
+        <span class="burger-line"></span>
+        <span class="burger-line"></span>
+        <span class="burger-line"></span>
+      </button>
+    </div>
+    <div class="header-center">
+      <h1 class="app-logo">Nightr</h1>
+    </div>
+    <div class="header-right">
+      <button class="icon-btn glass-btn" id="addEventBtn" aria-label="Nouvelle soirée">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Burger Menu Overlay -->
+<div class="menu-overlay" id="menuOverlay" aria-hidden="true"></div>
+
+<!-- Burger Menu Panel -->
+<nav class="menu-panel glass-panel" id="menuPanel" role="navigation" aria-label="Menu principal">
+  <div class="menu-header">
+    <div class="menu-logo">🌙 Nightr</div>
+    <button class="close-menu-btn glass-btn" id="closeMenuBtn" aria-label="Fermer le menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Current event selector -->
+  <div class="menu-event-selector glass-card" id="menuEventSelector">
+    <div class="event-selector-label">Soirée active</div>
+    <div class="event-selector-value" id="activeEventName">Aucune soirée</div>
+    <svg class="event-selector-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+  </div>
+
+  <ul class="menu-items">
+    <li><button class="menu-item active" data-view="dashboard">
+      <span class="menu-icon">✦</span><span class="menu-label">Dashboard</span>
+    </button></li>
+    <li><button class="menu-item" data-view="guests">
+      <span class="menu-icon">👥</span><span class="menu-label">Invités & RSVP</span>
+      <span class="menu-badge" id="badgeGuests"></span>
+    </button></li>
+    <li><button class="menu-item" data-view="invitations">
+      <span class="menu-icon">📩</span><span class="menu-label">Invitations & QR</span>
+    </button></li>
+    <li><button class="menu-item" data-view="contributions">
+      <span class="menu-icon">🛒</span><span class="menu-label">Contributions</span>
+    </button></li>
+    <li><button class="menu-item" data-view="budget">
+      <span class="menu-icon">💰</span><span class="menu-label">Budget & Stats</span>
+    </button></li>
+    <li><button class="menu-item" data-view="checklist">
+      <span class="menu-icon">✅</span><span class="menu-label">Checklist</span>
+      <span class="menu-badge" id="badgeChecklist"></span>
+    </button></li>
+    <li><button class="menu-item" data-view="vibes">
+      <span class="menu-icon">🎵</span><span class="menu-label">Ambiance</span>
+    </button></li>
+  </ul>
+
+  <div class="menu-footer">
+    <button class="menu-item menu-item-secondary" data-view="settings">
+      <span class="menu-icon">⚙️</span><span class="menu-label">Paramètres</span>
+    </button>
+    <div class="menu-user glass-card" id="menuUser">
+      <div class="user-avatar" id="userAvatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="userName">Non connecté</div>
+        <div class="user-email" id="userEmail">—</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Main Content Area -->
+<main class="main-content" id="mainContent">
+  <!-- Views are injected here by JS -->
+  <div class="view-container" id="viewContainer">
+    <div class="loading-state">
+      <div class="loading-orb"></div>
+      <p>Chargement…</p>
+    </div>
+  </div>
+</main>
+```
+
+  </div>
+
+  <!-- Toast Notifications -->
+
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <!-- Modal Container -->
+
+  <div class="modal-overlay" id="modalOverlay" aria-hidden="true"></div>
+  <div class="modal-container" id="modalContainer" role="dialog" aria-modal="true"></div>
+
+  <!-- Service Worker Registration -->
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(r => console.log('Nightr SW ✓', r.scope))
+          .catch(e => console.warn('SW:', e));
+      });
+    }
+  </script>
+
+</body>
+</html>
