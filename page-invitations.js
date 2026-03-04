@@ -1,5 +1,5 @@
 // ===== page-invitations.js =====
-import { dbGet, showToast, openModal, closeModal } from ‘./app.js’;
+import { dbGet, showToast, openModal, closeModal } from ‘./utils.js’;
 
 let events = [];
 let guests = [];
