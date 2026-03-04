@@ -6,12 +6,12 @@
 // ── CONFIG FIREBASE ─────────────────────────────────────────
 // ⚠️  Remplace ces valeurs par ta vraie config Firebase
 var FIREBASE_CONFIG = {
-  apiKey:            "VOTRE_API_KEY",
-  authDomain:        "VOTRE_PROJECT.firebaseapp.com",
-  projectId:         "VOTRE_PROJECT_ID",
-  storageBucket:     "VOTRE_PROJECT.appspot.com",
-  messagingSenderId: "VOTRE_SENDER_ID",
-  appId:             "VOTRE_APP_ID"
+  apiKey:            "AIzaSyCR3A1Rfd08MdnSAVKcMFZh1mApCnt_dL0",
+  authDomain:        "nightr-48fd7.firebaseapp.com",
+  projectId:         "nightr-48fd7",
+  storageBucket:     "nightr-48fd7.firebasestorage.app",
+  messagingSenderId: "781987170518",
+  appId:             "1:781987170518:web:5b49f4958b0ac313e1a177"
 };
 // ────────────────────────────────────────────────────────────
 
@@ -220,7 +220,8 @@ function showModal(html, onClose) {
     wrap.classList.remove('on');
     setTimeout(function(){ wrap.innerHTML = ''; if (onClose) onClose(); }, 420);
   }
-  bg.onclick = close;
+  // Ferme seulement si clic direct sur le fond (pas sur le contenu)
+  bg.onclick = function(e) { if (e.target === bg) close(); };
   _modalClose = close;
   return close;
 }
