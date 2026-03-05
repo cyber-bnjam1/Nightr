@@ -1,28 +1,50 @@
 /* ============================================================
-   NIGHTR — nightr.js
-   Vanilla JS, pas de modules ES, fonctionne partout.
+   NIGHTR — nightr.js  (vanilla JS, aucun module ES)
    ============================================================ */
 
-// ── CONFIG FIREBASE ─────────────────────────────────────────
-// ⚠️  Remplace ces valeurs par ta vraie config Firebase
+// ══════════════════════════════════════════════════════════════
+// ⚠️  REMPLACE CES VALEURS PAR TA CONFIG FIREBASE
+// ══════════════════════════════════════════════════════════════
 var FIREBASE_CONFIG = {
-  apiKey:            "AIzaSyCR3A1Rfd08MdnSAVKcMFZh1mApCnt_dL0",
-  authDomain:        "nightr-48fd7.firebaseapp.com",
-  projectId:         "nightr-48fd7",
-  storageBucket:     "nightr-48fd7.firebasestorage.app",
-  messagingSenderId: "781987170518",
-  appId:             "1:781987170518:web:5b49f4958b0ac313e1a177"
+  apiKey:            "VOTRE_API_KEY",
+  authDomain:        "VOTRE_PROJECT.firebaseapp.com",
+  projectId:         "VOTRE_PROJECT_ID",
+  storageBucket:     "VOTRE_PROJECT.appspot.com",
+  messagingSenderId: "VOTRE_SENDER_ID",
+  appId:             "VOTRE_APP_ID"
 };
-// ────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
 
-// ── STATE ────────────────────────────────────────────────────
+// ── Détection config valide ───────────────────────────────────
+var FIREBASE_OK = (
+  FIREBASE_CONFIG.apiKey &&
+  FIREBASE_CONFIG.apiKey !== "VOTRE_API_KEY" &&
+  FIREBASE_CONFIG.projectId &&
+  FIREBASE_CONFIG.projectId !== "VOTRE_PROJECT_ID"
+);
+
+// ── STATE ─────────────────────────────────────────────────────
 var APP = {
-  user: null,
-  events: [],
-  activeId: localStorage.getItem('nightr_ev') || null,
-  view: 'dashboard',
-  unsubs: []
+  user:     null,
+  events:   [],
+  activeId: null,
+  view:     'dashboard',
+  unsubs:   [],
+  localMode: !FIREBASE_OK   // true = stockage localStorage uniquement
 };
+
+// Charge les events depuis localStorage si mode local
+function _loadLocal() {
+  try {
+    var raw = localStorage.getItem('nightr_events');
+    APP.events = raw ? JSON.parse(raw) : [];
+  } catch(e) { APP.events = []; }
+  APP.activeId = localStorage.getItem('nightr_ev') || (APP.events[0] ? APP.events[0].id : null);
+}
+function _saveLocal() {
+  try { localStorage.setItem('nightr_events', JSON.stringify(APP.events)); } catch(e) {}
+}
+function _genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
 function activeEvent() {
   return APP.events.find(function(e){ return e.id === APP.activeId; }) || null;
@@ -30,33 +52,173 @@ function activeEvent() {
 function setActive(id) {
   APP.activeId = id;
   localStorage.setItem('nightr_ev', id || '');
-  var ev = activeEvent();
   var el = document.getElementById('activeEventName');
-  if (el) el.textContent = ev ? ev.name : 'Aucune soirée';
+  if (el) el.textContent = (activeEvent() || {name:'Aucune soirée'}).name;
   navTo(APP.view);
 }
 
-// ── FIREBASE INIT ─────────────────────────────────────────────
+// ── FIREBASE INIT (seulement si config valide) ────────────────
 var db, auth;
-firebase.initializeApp(FIREBASE_CONFIG);
-db   = firebase.firestore();
-auth = firebase.auth();
+if (FIREBASE_OK) {
+  try {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db   = firebase.firestore();
+    auth = firebase.auth();
+  } catch(e) {
+    console.warn('Firebase init failed:', e.message);
+    APP.localMode = true;
+  }
+}
 
-// ── DOM READY ────────────────────────────────────────────────
+// ── DOM READY ─────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
   setupMenu();
   setupNav();
 
-  auth.onAuthStateChanged(function(user) {
-    APP.user = user;
-    updateUserUI(user);
-    if (user) {
-      startEventListener(user.uid);
-    } else {
-      showAuthScreen();
-    }
-  });
+  if (APP.localMode) {
+    // Mode local : pas de Firebase, on démarre directement
+    _loadLocal();
+    APP.user = { uid: 'local', displayName: 'Utilisateur local', isAnonymous: true };
+    updateUserUI(APP.user);
+    // Fake user chip
+    var nm = document.getElementById('userName');
+    var em = document.getElementById('userEmail');
+    if (nm) nm.textContent = 'Mode local';
+    if (em) em.textContent = '⚠️ Firebase non configuré';
+    navTo('dashboard');
+    // Warn banner
+    toast('Mode local actif — configure Firebase pour sauvegarder dans le cloud', 'inf', 6000);
+  } else {
+    auth.onAuthStateChanged(function(user) {
+      APP.user = user;
+      updateUserUI(user);
+      if (user) {
+        startEventListener(user.uid);
+      } else {
+        showAuthScreen();
+      }
+    });
+  }
 });
+
+// ── FIREBASE HELPERS ──────────────────────────────────────────
+function eventsCol(uid)        { return db.collection('users').doc(uid).collection('events'); }
+function eventDoc(uid, eid)    { return eventsCol(uid).doc(eid); }
+function subCol(uid, eid, sub) { return eventDoc(uid, eid).collection(sub); }
+
+function createEvent(data, cb) {
+  if (APP.localMode) {
+    var ev = Object.assign({}, data, { id: _genId(), createdAt: Date.now() });
+    APP.events.unshift(ev);
+    _saveLocal();
+    if (cb) cb({ id: ev.id });
+    return;
+  }
+  eventsCol(APP.user.uid)
+    .add(Object.assign({}, data, { createdAt: firebase.firestore.FieldValue.serverTimestamp() }))
+    .then(cb)
+    .catch(function(e){ toast('Erreur: ' + e.message, 'err'); });
+}
+function updateEvent(eid, data) {
+  if (APP.localMode) {
+    var idx = APP.events.findIndex(function(e){ return e.id === eid; });
+    if (idx > -1) { Object.assign(APP.events[idx], data); _saveLocal(); }
+    // Re-render si c'est l'event actif
+    var el = document.getElementById('activeEventName');
+    if (el && APP.activeId === eid) el.textContent = (activeEvent()||{name:''}).name;
+    return;
+  }
+  eventDoc(APP.user.uid, eid)
+    .update(Object.assign({}, data, { updatedAt: firebase.firestore.FieldValue.serverTimestamp() }))
+    .catch(function(e){ toast(e.message,'err'); });
+}
+function deleteEventDoc(eid) {
+  if (APP.localMode) {
+    APP.events = APP.events.filter(function(e){ return e.id !== eid; });
+    _saveLocal();
+    if (APP.activeId === eid) setActive(APP.events[0] ? APP.events[0].id : null);
+    navTo(APP.view);
+    return;
+  }
+  eventDoc(APP.user.uid, eid).delete();
+}
+function startEventListener(uid) {
+  APP.unsubs.forEach(function(fn){ fn(); });
+  APP.unsubs = [];
+  var unsub = eventsCol(uid).orderBy('createdAt','desc').onSnapshot(function(snap) {
+    APP.events = snap.docs.map(function(d){ return Object.assign({ id: d.id }, d.data()); });
+    if (APP.activeId && !APP.events.find(function(e){ return e.id === APP.activeId; })) {
+      APP.activeId = APP.events[0] ? APP.events[0].id : null;
+    } else if (!APP.activeId && APP.events.length) {
+      APP.activeId = APP.events[0].id;
+    }
+    localStorage.setItem('nightr_ev', APP.activeId || '');
+    var el = document.getElementById('activeEventName');
+    if (el) el.textContent = activeEvent() ? activeEvent().name : 'Aucune soirée';
+    navTo(APP.view);
+  });
+  APP.unsubs.push(unsub);
+}
+
+// ── SUB-COLLECTIONS (localStorage en mode local) ──────────────
+function _subKey(sub) { return 'nightr_sub_' + APP.activeId + '_' + sub; }
+function _loadSub(sub) {
+  try { return JSON.parse(localStorage.getItem(_subKey(sub)) || '[]'); } catch(e){ return []; }
+}
+function _saveSub(sub, arr) {
+  try { localStorage.setItem(_subKey(sub), JSON.stringify(arr)); } catch(e){}
+}
+
+function addSub(sub, data, cb) {
+  if (APP.localMode) {
+    var arr = _loadSub(sub);
+    var item = Object.assign({}, data, { id: _genId(), createdAt: Date.now() });
+    arr.push(item);
+    _saveSub(sub, arr);
+    if (cb) cb({ id: item.id });
+    // Trigger re-render via fake snapshot
+    if (_subListeners[sub]) _subListeners[sub](arr);
+    return;
+  }
+  subCol(APP.user.uid, APP.activeId, sub)
+    .add(Object.assign({}, data, { createdAt: firebase.firestore.FieldValue.serverTimestamp() }))
+    .then(cb || function(){})
+    .catch(function(e){ toast(e.message,'err'); });
+}
+function updateSub(sub, id, data) {
+  if (APP.localMode) {
+    var arr = _loadSub(sub);
+    var idx = arr.findIndex(function(i){ return i.id === id; });
+    if (idx > -1) { Object.assign(arr[idx], data); _saveSub(sub, arr); }
+    if (_subListeners[sub]) _subListeners[sub](arr);
+    return;
+  }
+  subCol(APP.user.uid, APP.activeId, sub).doc(id)
+    .update(Object.assign({}, data, { updatedAt: firebase.firestore.FieldValue.serverTimestamp() }))
+    .catch(function(e){ toast(e.message,'err'); });
+}
+function deleteSub(sub, id) {
+  if (APP.localMode) {
+    var arr = _loadSub(sub).filter(function(i){ return i.id !== id; });
+    _saveSub(sub, arr);
+    if (_subListeners[sub]) _subListeners[sub](arr);
+    return;
+  }
+  subCol(APP.user.uid, APP.activeId, sub).doc(id).delete();
+}
+var _subListeners = {};
+function listenSub(sub, cb) {
+  if (APP.localMode) {
+    _subListeners[sub] = cb;
+    cb(_loadSub(sub));   // appel immédiat avec données existantes
+    return function(){ delete _subListeners[sub]; };
+  }
+  return subCol(APP.user.uid, APP.activeId, sub)
+    .orderBy('createdAt','asc')
+    .onSnapshot(function(snap){
+      cb(snap.docs.map(function(d){ return Object.assign({ id: d.id }, d.data()); }));
+    });
+}
 
 // ── MENU ──────────────────────────────────────────────────────
 function setupMenu() {
@@ -107,58 +269,6 @@ function navTo(view) {
     vibes:         renderVibes
   };
   if (renders[view]) renders[view](container);
-}
-
-// ── FIREBASE HELPERS ──────────────────────────────────────────
-function eventsCol(uid)           { return db.collection('users').doc(uid).collection('events'); }
-function eventDoc(uid, eid)       { return eventsCol(uid).doc(eid); }
-function subCol(uid, eid, sub)    { return eventDoc(uid, eid).collection(sub); }
-
-function createEvent(data, cb) {
-  eventsCol(APP.user.uid).add(Object.assign({}, data, { createdAt: firebase.firestore.FieldValue.serverTimestamp() }))
-    .then(cb).catch(function(e){ toast('Erreur Firebase: '+e.message,'err'); });
-}
-function updateEvent(eid, data) {
-  eventDoc(APP.user.uid, eid).update(Object.assign({}, data, { updatedAt: firebase.firestore.FieldValue.serverTimestamp() }));
-}
-function deleteEventDoc(eid) {
-  eventDoc(APP.user.uid, eid).delete();
-}
-function startEventListener(uid) {
-  APP.unsubs.forEach(function(fn){ fn(); });
-  APP.unsubs = [];
-  var unsub = eventsCol(uid).orderBy('createdAt','desc').onSnapshot(function(snap) {
-    APP.events = snap.docs.map(function(d){ return Object.assign({ id: d.id }, d.data()); });
-    if (APP.activeId && !APP.events.find(function(e){ return e.id === APP.activeId; })) {
-      APP.activeId = APP.events[0] ? APP.events[0].id : null;
-    } else if (!APP.activeId && APP.events.length) {
-      APP.activeId = APP.events[0].id;
-    }
-    localStorage.setItem('nightr_ev', APP.activeId || '');
-    var el = document.getElementById('activeEventName');
-    if (el) el.textContent = activeEvent() ? activeEvent().name : 'Aucune soirée';
-    navTo(APP.view);
-  });
-  APP.unsubs.push(unsub);
-}
-function addSub(sub, data, cb) {
-  subCol(APP.user.uid, APP.activeId, sub)
-    .add(Object.assign({}, data, { createdAt: firebase.firestore.FieldValue.serverTimestamp() }))
-    .then(cb || function(){}).catch(function(e){ toast(e.message,'err'); });
-}
-function updateSub(sub, id, data) {
-  subCol(APP.user.uid, APP.activeId, sub).doc(id)
-    .update(Object.assign({}, data, { updatedAt: firebase.firestore.FieldValue.serverTimestamp() }))
-    .catch(function(e){ toast(e.message,'err'); });
-}
-function deleteSub(sub, id) {
-  subCol(APP.user.uid, APP.activeId, sub).doc(id).delete();
-}
-function listenSub(sub, cb) {
-  return subCol(APP.user.uid, APP.activeId, sub)
-    .orderBy('createdAt','asc').onSnapshot(function(snap){
-      cb(snap.docs.map(function(d){ return Object.assign({ id: d.id }, d.data()); }));
-    });
 }
 
 // ── AUTH SCREEN ───────────────────────────────────────────────
