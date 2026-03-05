@@ -6,12 +6,12 @@
 // ⚠️  REMPLACE CES VALEURS PAR TA CONFIG FIREBASE
 // ══════════════════════════════════════════════════════════════
 var FIREBASE_CONFIG = {
-  apiKey:            "VOTRE_API_KEY",
-  authDomain:        "VOTRE_PROJECT.firebaseapp.com",
-  projectId:         "VOTRE_PROJECT_ID",
-  storageBucket:     "VOTRE_PROJECT.appspot.com",
-  messagingSenderId: "VOTRE_SENDER_ID",
-  appId:             "VOTRE_APP_ID"
+  apiKey:            "AIzaSyCR3A1Rfd08MdnSAVKcMFZh1mApCnt_dL0",
+  authDomain:        "nightr-48fd7.firebaseapp.com",
+  projectId:         "nightr-48fd7",
+  storageBucket:     "nightr-48fd7.firebasestorage.app",
+  messagingSenderId: "781987170518",
+  appId:             "1:781987170518:web:5b49f4958b0ac313e1a177"
 };
 // ══════════════════════════════════════════════════════════════
 
