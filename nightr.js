@@ -598,9 +598,16 @@ function showNewEventModal() {
       dressCode: val('ne-dress') || null,
       guestCount: 0, confirmedCount: 0, spent: 0
     }, function(ref) {
-      close();
-      setActive(ref.id);
-      toast('"' + name + '" créée ! 🎉','ok');
+      // Ferme le modal d'abord, PUIS change l'event actif après l'animation
+      var bg   = document.getElementById('modalBg');
+      var wrap = document.getElementById('modalWrap');
+      if (bg)   bg.classList.remove('on');
+      if (wrap) wrap.classList.remove('on');
+      setTimeout(function() {
+        if (wrap) wrap.innerHTML = '';
+        setActive(ref.id);
+        toast('"' + name + '" créée ! 🎉','ok');
+      }, 420);
     });
   });
 }
@@ -647,14 +654,14 @@ function renderGuests(container) {
       '<div style="font-size:11px;color:var(--txt3);margin-top:4px;text-align:right;" id="gs-pct">0% de réponses</div></div>' +
     '<div style="display:flex;gap:8px;margin-bottom:14px;">' +
       '<button class="btn btn-p" id="ga-add" style="flex:1;">+ Ajouter</button>' +
-      '<button class="btn btn-s" id="ga-imp">📱 Contacts</button>' +
+      (('contacts' in navigator && 'ContactsManager' in window) ? '<button class="btn btn-s" id="ga-imp">📱 Contacts</button>' : '') +
     '</div>' +
     '<div style="display:flex;gap:5px;margin-bottom:14px;">' +
       ['all','confirmed','pending','declined'].map(function(f,i){
         return '<button class="gfilt" data-f="' + f + '" style="flex:1;padding:8px 2px;border-radius:var(--rnd);font-size:11px;font-weight:600;cursor:pointer;border:1px solid ' + (i===0?'rgba(168,85,247,.3)':'var(--gbd)') + ';background:' + (i===0?'rgba(124,58,237,.25)':'var(--gb)') + ';color:' + (i===0?'#c084fc':'var(--txt2)') + ';">' + ['Tous','✅','⏳','❌'][i] + '</button>';
       }).join('') +
     '</div>' +
-    '<div id="g-list" class="stagger"></div>' +
+    '<div id="g-list"></div>' +
     '<div style="height:40px;"></div></div>';
 
   var filter = 'all';
@@ -700,8 +707,12 @@ function _renderGList(container, guests, filter, ev) {
   var data = filter==='all' ? guests : guests.filter(function(g){ return g.status===filter; });
   var el   = container.querySelector('#g-list');
   if (!el) return;
-  if (!data.length) { el.innerHTML = '<div class="empty"><div class="empty-ico">👥</div><div class="empty-t">Aucun invité</div><div class="empty-d">' + (filter==='all'?'Ajoute tes premiers invités !':'Aucun dans cette catégorie') + '</div></div>'; return; }
-  el.innerHTML = data.map(function(g) {
+  if (!data.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-ico">👥</div><div class="empty-t">Aucun invité</div><div class="empty-d">' + (filter==='all'?'Ajoute tes premiers invités !':'Aucun dans cette catégorie') + '</div></div>';
+    return;
+  }
+  // Diff : ne recrée que les lignes qui ont changé pour éviter le scintillement
+  var newHtml = data.map(function(g) {
     var bg = g.status==='confirmed'?'rgba(16,185,129,.22)':g.status==='declined'?'rgba(239,68,68,.18)':'var(--gb2)';
     return '<div class="li" data-gid="' + esc(g.id) + '">' +
       '<div class="li-icon" style="border-radius:50%;background:' + bg + ';font-size:15px;font-weight:700;">' + esc(g.name.charAt(0).toUpperCase()) + '</div>' +
@@ -718,6 +729,15 @@ function _renderGList(container, guests, filter, ev) {
         '<button class="gdel glass-btn" data-gid="' + esc(g.id) + '" style="width:27px;height:27px;font-size:11px;color:var(--txt3);margin-left:2px;">✕</button>' +
       '</div></div>';
   }).join('');
+  // Seulement mettre à jour si le contenu a vraiment changé (évite scintillement)
+  if (el.innerHTML !== newHtml) {
+    // Sauvegarde position de scroll
+    var main = document.getElementById('main');
+    var scrollY = main ? main.scrollTop : 0;
+    el.innerHTML = newHtml;
+    // Restaure position de scroll
+    if (main) main.scrollTop = scrollY;
+  }
   el.querySelectorAll('.rb').forEach(function(btn) {
     btn.addEventListener('click', function(){ updateSub('guests', btn.dataset.gid, { status: btn.dataset.s }); });
   });
