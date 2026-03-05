@@ -587,6 +587,9 @@ function showNewEventModal() {
   on('ne-save','click', function() {
     var name = val('ne-name');
     if (!name) { toast('Le nom est requis','err'); return; }
+    // Désactive le bouton immédiatement pour éviter les doublons
+    var btn = document.getElementById('ne-save');
+    if (btn) { btn.disabled = true; btn.textContent = 'Création…'; btn.style.opacity = '.6'; }
     createEvent({
       emoji: selEmoji, name: name,
       date: val('ne-date') || null,
@@ -595,9 +598,9 @@ function showNewEventModal() {
       dressCode: val('ne-dress') || null,
       guestCount: 0, confirmedCount: 0, spent: 0
     }, function(ref) {
+      close();
       setActive(ref.id);
       toast('"' + name + '" créée ! 🎉','ok');
-      close();
     });
   });
 }
