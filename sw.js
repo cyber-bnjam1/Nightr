@@ -1,4 +1,4 @@
-var CACHE = 'nightr-v2';
+var CACHE = 'nightr-v3';
 var FILES = ['/', '/index.html', '/nightr.css', '/nightr.js', '/manifest.json'];
 self.addEventListener('install', function(e) {
   e.waitUntil(caches.open(CACHE).then(function(c){ return c.addAll(FILES); }).then(function(){ return self.skipWaiting(); }));
