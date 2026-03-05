@@ -157,7 +157,7 @@ function updateEvent(eid, data) {
     return;
   }
   eventDoc(APP.user.uid, eid)
-    .update(Object.assign({}, data, { updatedAt: firebase.firestore.FieldValue.serverTimestamp() }))
+    .set(Object.assign({}, data, { updatedAt: firebase.firestore.FieldValue.serverTimestamp() }), { merge: true })
     .catch(function(e){ toast(e.message,'err'); });
 }
 function deleteEventDoc(eid) {
@@ -222,7 +222,7 @@ function updateSub(sub, id, data) {
     return;
   }
   subCol(APP.user.uid, APP.activeId, sub).doc(id)
-    .update(Object.assign({}, data, { updatedAt: firebase.firestore.FieldValue.serverTimestamp() }))
+    .set(Object.assign({}, data, { updatedAt: firebase.firestore.FieldValue.serverTimestamp() }), { merge: true })
     .catch(function(e){ toast(e.message,'err'); });
 }
 function deleteSub(sub, id) {
