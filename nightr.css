@@ -33,7 +33,7 @@
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;overflow:hidden;background:var(--void);}
-body{font-family:var(--fb);color:var(--txt);-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;overscroll-behavior:none;}
+body{font-family:var(--fb);color:var(--txt);-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;overscroll-behavior:none;touch-action: manipulation;}
 
 /* ORBS */
 .bg-orbs{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
