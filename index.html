@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Nightr" />
-  <meta name="theme-color" content="#0d0d1a" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Nightr"/>
+  <meta name="theme-color" content="#09090f"/>
   <title>Nightr</title>
-  <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="icon-192.png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="apple-touch-icon" href="icon-192.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 
@@ -28,13 +28,674 @@
 
 <!-- APP -->
 <div id="app" class="hidden">
+
+  <!-- HEADER -->
   <header id="main-header">
     <div class="header-inner">
-      <button id="btn-back" class="btn-icon hidden">←</button>
+      <button id="btn-back" class="btn-icon hidden" aria-label="Retour">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      </button>
       <h1 id="header-title">nightr</h1>
-      <button id="btn-add-event" class="btn-icon">＋</button>
+      <button id="btn-burger" class="btn-icon burger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </header>
+
+  <!-- PAGES -->
+  <main id="pages">
+
+    <!-- HOME -->
+    <section id="page-home" class="page active">
+      <div class="page-content">
+        <p class="section-title">Mes soirées</p>
+        <div id="events-list" class="events-grid"></div>
+        <div id="empty-state" class="empty-state hidden">
+          <div class="empty-icon">🥂</div>
+          <p>Aucune soirée pour l'instant</p>
+          <button class="btn-primary" id="btn-empty-create">Créer ma première soirée</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- DÉTAIL ÉVÉNEMENT (sections scrollables, pas d'onglets) -->
+    <section id="page-event" class="page">
+      <!-- Hero -->
+      <div class="event-hero" id="event-hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <span id="event-type-badge" class="hero-badge"></span>
+          <h2 id="event-name-display"></h2>
+          <p id="event-date-display" class="hero-meta"></p>
+          <p id="event-lieu-display" class="hero-meta"></p>
+        </div>
+      </div>
+
+      <!-- INVITÉS -->
+      <div class="section-card">
+        <div class="section-header">
+          <h3>👥 Invités</h3>
+          <span class="chip g" id="chip-confirmed">0 confirmés</span>
+        </div>
+        <div class="section-body">
+          <div class="stats-row">
+            <div class="stat-card"><span class="stat-num" id="stat-invites">0</span><span class="stat-label">Total</span></div>
+            <div class="stat-card c"><span class="stat-num" id="stat-confirmed">0</span><span class="stat-label">Confirmés</span></div>
+            <div class="stat-card d"><span class="stat-num" id="stat-declined">0</span><span class="stat-label">Absents</span></div>
+          </div>
+          <div class="add-row">
+            <input type="text" id="input-invite-name" placeholder="Prénom ou nom…" class="input-field"/>
+            <button class="btn-add" id="btn-add-invite">＋</button>
+          </div>
+          <div id="invites-list" class="item-list"></div>
+        </div>
+      </div>
+
+      <!-- COURSES -->
+      <div class="section-card">
+        <div class="section-header">
+          <h3>🛒 Courses</h3>
+          <button class="btn-secondary" id="btn-gen-courses">✨ Auto</button>
+        </div>
+        <div class="section-body">
+          <div class="add-row">
+            <input type="text" id="input-course-name" placeholder="Article…" class="input-field" style="flex:2"/>
+            <input type="text" id="input-course-qty" placeholder="Qté" class="input-field" style="flex:1;max-width:70px"/>
+            <button class="btn-add" id="btn-add-course">＋</button>
+          </div>
+          <div id="courses-list" class="item-list"></div>
+        </div>
+      </div>
+
+      <!-- BUDGET -->
+      <div class="section-card">
+        <div class="section-header"><h3>💸 Budget</h3></div>
+        <div class="section-body">
+          <div class="budget-overview">
+            <div class="budget-arc-wrap">
+              <svg viewBox="0 0 120 70" class="budget-arc">
+                <path d="M10,60 A50,50 0 0,1 110,60" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="10" stroke-linecap="round"/>
+                <path id="budget-arc-fill" d="M10,60 A50,50 0 0,1 110,60" fill="none" stroke="url(#arcGrad)" stroke-width="10" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="157"/>
+                <defs><linearGradient id="arcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#f97316"/><stop offset="100%" stop-color="#facc15"/>
+                </linearGradient></defs>
+              </svg>
+              <div class="budget-center">
+                <span id="budget-spent-display">0€</span>
+                <small>/ <span id="budget-total-display">0€</span></small>
+              </div>
+            </div>
+          </div>
+          <input type="number" id="input-budget-total" placeholder="Budget total (€)" class="input-field" style="margin-bottom:12px"/>
+          <div class="add-row">
+            <input type="text" id="input-depense-label" placeholder="Dépense…" class="input-field" style="flex:2"/>
+            <input type="number" id="input-depense-amount" placeholder="€" class="input-field" style="flex:1;max-width:70px"/>
+            <button class="btn-add" id="btn-add-depense">＋</button>
+          </div>
+          <div id="depenses-list" class="item-list"></div>
+        </div>
+      </div>
+
+      <!-- CHECKLIST -->
+      <div class="section-card" style="margin-bottom:30px">
+        <div class="section-header">
+          <h3>✅ Checklist</h3>
+          <button class="btn-secondary" id="btn-gen-checklist">✨ Auto</button>
+        </div>
+        <div class="section-body">
+          <div class="progress-wrap">
+            <div class="progress-bar"><div id="checklist-progress" class="progress-fill" style="width:0%"></div></div>
+            <span class="progress-pct" id="checklist-pct">0%</span>
+          </div>
+          <div class="add-row">
+            <input type="text" id="input-check-item" placeholder="Tâche à faire…" class="input-field"/>
+            <button class="btn-add" id="btn-add-check">＋</button>
+          </div>
+          <div id="checklist-list" class="item-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RÉGLAGES -->
+    <section id="page-settings" class="page">
+      <div class="page-content">
+        <div class="settings-group">
+          <div class="settings-group-label">Compte</div>
+          <div class="settings-card">
+            <div class="settings-row">
+              <div class="settings-row-icon">👤</div>
+              <div class="settings-row-info">
+                <strong id="settings-username">Non connecté</strong>
+                <span id="settings-email">Connecte-toi pour synchroniser</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="settings-group">
+          <div class="settings-group-label">Connexion</div>
+          <div class="settings-card">
+            <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:8px;padding:14px">
+              <button class="btn-google" id="btn-google-signin">
+                <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                Continuer avec Google
+              </button>
+              <button class="btn-signout hidden" id="btn-signout">Se déconnecter</button>
+            </div>
+          </div>
+        </div>
+        <div class="settings-group">
+          <div class="settings-group-label">Application</div>
+          <div class="settings-card">
+            <div class="settings-row">
+              <div class="settings-row-icon">☁️</div>
+              <div class="settings-row-info">
+                <strong>Synchronisation</strong>
+                <span id="settings-sync-status">Vérification…</span>
+              </div>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-icon">📱</div>
+              <div class="settings-row-info">
+                <strong>Version</strong>
+                <span>Nightr v3.0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FAB (accueil seulement) -->
+  <button id="fab" aria-label="Nouvelle soirée">＋</button>
+
+</div>
+
+<!-- DRAWER -->
+<div id="drawer-overlay"></div>
+<nav id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-user">
+      <div class="drawer-avatar" id="drawer-avatar">N</div>
+      <div class="drawer-user-info">
+        <h4 id="drawer-username">Nightr</h4>
+        <p id="drawer-email">Non connecté</p>
+      </div>
+    </div>
+  </div>
+  <div class="drawer-nav">
+    <button class="drawer-item active" id="drawer-home">
+      <span class="drawer-item-icon">🏠</span>Mes soirées
+    </button>
+    <button class="drawer-item" id="drawer-settings">
+      <span class="drawer-item-icon">⚙️</span>Réglages
+    </button>
+  </div>
+  <div class="drawer-footer">
+    <button class="btn-google" id="drawer-google-signin">
+      <svg viewBox="0 0 48 48" width="17" height="17"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Connexion Google
+    </button>
+    <button class="btn-signout hidden" id="drawer-signout">Se déconnecter</button>
+  </div>
+</nav>
+
+<!-- MODAL CRÉER -->
+<div id="modal-create" class="modal-overlay hidden">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title">Nouvelle soirée 🎉</h3>
+    <label class="form-label">Type</label>
+    <div class="type-grid" id="type-selector">
+      <button class="type-opt active" data-type="soiree"       data-emoji="🎉">🎉 Soirée</button>
+      <button class="type-opt"        data-type="anniversaire" data-emoji="🎂">🎂 Anniv</button>
+      <button class="type-opt"        data-type="cremaillere"  data-emoji="🏠">🏠 Crémaillère</button>
+      <button class="type-opt"        data-type="mariage"      data-emoji="💍">💍 Mariage</button>
+      <button class="type-opt"        data-type="bbq"          data-emoji="🍖">🍖 BBQ</button>
+      <button class="type-opt"        data-type="autre"        data-emoji="✨">✨ Autre</button>
+    </div>
+    <label class="form-label">Nom</label>
+    <input type="text" id="input-event-name" class="input-field" placeholder="Ex : Annif de Lucie"/>
+    <label class="form-label">Date</label>
+    <input type="date" id="input-event-date" class="input-field"/>
+    <label class="form-label">Lieu</label>
+    <input type="text" id="input-event-lieu" class="input-field" placeholder="Adresse ou lieu"/>
+    <div style="height:14px"></div>
+    <button class="btn-primary full" id="btn-create-confirm">Créer la soirée 🎊</button>
+    <button class="btn-ghost full"   id="btn-create-cancel">Annuler</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<!-- ═══════════ SCRIPT PRINCIPAL ═══════════ -->
+<script type="module">
+import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, doc, setDoc, deleteDoc, getDocs, query, where }
+                           from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+                           from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+// ── FIREBASE ─────────────────────────────────────
+const firebaseConfig = {
+  apiKey:            "AIzaSyCR3A1Rfd08MdnSAVKcMFZh1mApCnt_dL0",
+  authDomain:        "nightr-48fd7.firebaseapp.com",
+  projectId:         "nightr-48fd7",
+  storageBucket:     "nightr-48fd7.firebasestorage.app",
+  messagingSenderId: "781987170518",
+  appId:             "1:781987170518:web:5b49f4958b0ac313e1a177"
+};
+let db = null, auth = null, currentUser = null;
+try {
+  const app = initializeApp(firebaseConfig);
+  db   = getFirestore(app);
+  auth = getAuth(app);
+} catch(e) { console.warn("Firebase KO", e); }
+
+// ── ÉTAT ─────────────────────────────────────────
+let events = {};
+let currentEventId = null;
+
+const TYPE_COLORS = {
+  soiree:       ['#f97316','#a855f7'], anniversaire: ['#ec4899','#f97316'],
+  cremaillere:  ['#22d3ee','#4ade80'], mariage:      ['#facc15','#f9a8d4'],
+  bbq:          ['#f97316','#ef4444'], autre:        ['#a855f7','#22d3ee'],
+};
+const AUTO_COURSES = {
+  soiree:       ['Boissons alcoolisées','Sodas / Jus','Chips / Apéro','Glace & glaçons','Verres / Gobelets','Serviettes'],
+  anniversaire: ["Gâteau d'anniversaire",'Bougies','Boissons','Chips / Apéro','Assiettes','Décorations'],
+  cremaillere:  ['Boissons','Fromages & charcuterie','Pain','Champagne','Verres','Fleurs'],
+  mariage:      ['Champagne','Vin rouge/blanc','Eau minérale','Sodas','Canapés','Pièce montée'],
+  bbq:          ['Viandes & saucisses','Légumes à griller','Pain','Sauces','Charbon','Assiettes'],
+  autre:        ['Boissons','Grignotage','Vaisselle jetable','Serviettes'],
+};
+const AUTO_CHECKLIST = {
+  soiree:       ['Préparer la playlist','Acheter les boissons','Ranger / Nettoyer','Préparer la déco','Prévenir les voisins','Sortir les poubelles après'],
+  anniversaire: ['Commander / Préparer le gâteau','Acheter les bougies','Préparer la déco','Prévoir un cadeau','Envoyer les invitations','Prévoir une surprise'],
+  cremaillere:  ['Acheter les boissons','Nettoyer le logement',"Préparer l'apéro",'Prévoir stationnement','Allumer les bougies / Ambiance'],
+  mariage:      ['Confirmer le traiteur','Vérifier la salle','Playlist cérémonie','Playlist soirée','Plan de table','Fleurs & déco'],
+  bbq:          ['Allumer le barbecue','Mariner les viandes','Préparer les salades','Vérifier le gaz / charbon','Prévoir une zone ombre'],
+  autre:        ['Envoyer les invitations','Préparer le lieu','Faire les courses','Décoration'],
+};
+
+// ── UTILS ────────────────────────────────────────
+const $ = id => document.getElementById(id);
+function showToast(msg) {
+  const t=$('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+function setHeaderTitle(txt, gradient=false) {
+  const el=$('header-title');
+  if (gradient) {
+    el.textContent=txt;
+    el.style.background='linear-gradient(135deg,#f97316,#a855f7)';
+    el.style['-webkit-background-clip']='text';
+    el.style['-webkit-text-fill-color']='transparent';
+  } else {
+    el.textContent=txt;
+    el.style.background='none';
+    el.style['-webkit-text-fill-color']='var(--text)';
+  }
+}
+
+// ── PERSISTANCE ──────────────────────────────────
+function localSave(){ try{localStorage.setItem('nightr_events',JSON.stringify(events));}catch(e){} }
+function localLoad(){ try{const d=localStorage.getItem('nightr_events');if(d)events=JSON.parse(d);}catch(e){} }
+async function saveEvent(id){
+  localSave();
+  if(!db) return;
+  const uid=currentUser?.uid||'anon';
+  try{ await setDoc(doc(collection(db,'events'),id),{...events[id],uid}); }catch(e){console.warn(e);}
+}
+async function deleteEventDB(id){
+  localSave();
+  if(!db) return;
+  try{ await deleteDoc(doc(collection(db,'events'),id)); }catch(e){console.warn(e);}
+}
+async function loadEvents(){
+  if(db && currentUser){
+    try{
+      const q=query(collection(db,'events'),where('uid','==',currentUser.uid));
+      const snap=await getDocs(q);
+      events={};
+      snap.forEach(d=>{events[d.id]=d.data();});
+      localSave(); return;
+    }catch(e){console.warn('Firestore KO, fallback local',e);}
+  }
+  localLoad();
+}
+
+// ── AUTH ─────────────────────────────────────────
+function updateAuthUI(user){
+  const ok=!!user;
+  $('drawer-avatar').textContent=user?.displayName?.[0]?.toUpperCase()||'N';
+  if(user?.photoURL) $('drawer-avatar').innerHTML=`<img src="${user.photoURL}" alt="avatar"/>`;
+  $('drawer-username').textContent=user?.displayName||'Nightr';
+  $('drawer-email').textContent=user?.email||'Non connecté';
+  $('drawer-google-signin').classList.toggle('hidden',ok);
+  $('drawer-signout').classList.toggle('hidden',!ok);
+  $('settings-username').textContent=user?.displayName||'Non connecté';
+  $('settings-email').textContent=user?.email||'Connecte-toi pour synchroniser';
+  $('btn-google-signin').classList.toggle('hidden',ok);
+  $('btn-signout').classList.toggle('hidden',!ok);
+  $('settings-sync-status').textContent=db?(ok?'✅ Connecté':'⚠️ Non connecté'):'❌ Hors ligne';
+}
+async function signInGoogle(){
+  if(!auth) return showToast('Auth non disponible');
+  try{
+    const result=await signInWithPopup(auth,new GoogleAuthProvider());
+    currentUser=result.user;
+    await loadEvents(); renderHome(); showToast('Connecté ! 🎉');
+  }catch(e){console.warn(e); showToast('Erreur de connexion');}
+}
+async function doSignOut(){
+  if(!auth) return;
+  await signOut(auth);
+  currentUser=null; events={}; localLoad(); renderHome(); showToast('Déconnecté');
+}
+
+// ── NAVIGATION ───────────────────────────────────
+function navigate(page, eventId){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  $('page-'+page).classList.add('active');
+  $('btn-back').classList.toggle('hidden', page==='home');
+  $('fab').classList.toggle('hidden', page!=='home');
+  if(page==='home'){
+    setHeaderTitle('nightr', true);
+    currentEventId=null; renderHome();
+  } else if(page==='event'){
+    currentEventId=eventId;
+    setHeaderTitle(events[eventId].name);
+    renderEventDetail(eventId);
+  } else if(page==='settings'){
+    setHeaderTitle('Réglages');
+  }
+  closeDrawer();
+}
+
+// ── DRAWER ───────────────────────────────────────
+function openDrawer(){  $('drawer').classList.add('open'); $('drawer-overlay').classList.add('open'); }
+function closeDrawer(){ $('drawer').classList.remove('open'); $('drawer-overlay').classList.remove('open'); }
+
+// ── MODAL ────────────────────────────────────────
+function openCreateEvent(){  $('modal-create').classList.remove('hidden'); }
+function closeCreateModal(){ $('modal-create').classList.add('hidden'); }
+function createEvent(){
+  const name=$('input-event-name').value.trim();
+  const date=$('input-event-date').value;
+  const lieu=$('input-event-lieu').value.trim();
+  const opt=document.querySelector('.type-opt.active');
+  const type=opt?.dataset.type||'soiree';
+  const emoji=opt?.dataset.emoji||'🎉';
+  if(!name){ showToast('Donne un nom à ta soirée 🎉'); return; }
+  const id='ev_'+Date.now();
+  events[id]={id,name,date,lieu,type,emoji,invites:[],courses:[],depenses:[],checklist:[],budget:{total:0},createdAt:Date.now()};
+  saveEvent(id); closeCreateModal();
+  $('input-event-name').value=''; $('input-event-date').value=''; $('input-event-lieu').value='';
+  showToast('Soirée créée ! 🥂');
+  setTimeout(()=>navigate('event',id), 200);
+}
+
+// ── HOME ─────────────────────────────────────────
+function renderHome(){
+  const el=$('events-list'), empty=$('empty-state');
+  const ids=Object.keys(events).sort((a,b)=>(events[b].createdAt||0)-(events[a].createdAt||0));
+  if(!ids.length){ el.innerHTML=''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  el.innerHTML=ids.map((id,i)=>{
+    const ev=events[id];
+    const confirmed=(ev.invites||[]).filter(g=>g.status==='confirmed').length;
+    const total=(ev.invites||[]).length;
+    const dateStr=ev.date?new Date(ev.date+'T12:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}):'';
+    const [c1,c2]=TYPE_COLORS[ev.type]||TYPE_COLORS.autre;
+    return `<div class="event-card" data-id="${id}" style="animation-delay:${i*.06}s;--c1:${c1};--c2:${c2}">
+      <div class="ec-top">
+        <span class="ec-emoji">${ev.emoji}</span>
+        <div class="ec-info">
+          <h3>${ev.name}</h3>
+          <p>${[dateStr,ev.lieu].filter(Boolean).join(' · ')}</p>
+        </div>
+        <button class="btn-card-del" data-del="${id}">🗑</button>
+      </div>
+      <div class="ec-chips">
+        ${total?`<span class="chip g">👥 ${confirmed}/${total}</span>`:''}
+        ${ev.budget?.total?`<span class="chip o">💸 ${ev.budget.total}€</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.event-card').forEach(c=>c.addEventListener('click',()=>navigate('event',c.dataset.id)));
+  el.querySelectorAll('.btn-card-del').forEach(b=>b.addEventListener('click',e=>{
+    e.stopPropagation();
+    if(confirm(`Supprimer "${events[b.dataset.del]?.name}" ?`)){
+      deleteEventDB(b.dataset.del); delete events[b.dataset.del]; renderHome(); showToast('Soirée supprimée');
+    }
+  }));
+}
+
+// ── DÉTAIL ───────────────────────────────────────
+function renderEventDetail(id){
+  const ev=events[id];
+  const [c1,c2]=TYPE_COLORS[ev.type]||TYPE_COLORS.autre;
+  $('event-hero').style.background=`linear-gradient(135deg,${c1},${c2})`;
+  $('event-type-badge').textContent=ev.emoji+' '+ev.type;
+  $('event-name-display').textContent=ev.name;
+  $('event-date-display').textContent=ev.date?'📅 '+new Date(ev.date+'T12:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'';
+  $('event-lieu-display').textContent=ev.lieu?'📍 '+ev.lieu:'';
+  renderInvites(); renderCourses(); renderDepenses(); renderChecklist(); updateBudgetUI();
+}
+
+// ── INVITÉS ──────────────────────────────────────
+function addInvite(){
+  const inp=$('input-invite-name'), name=inp.value.trim();
+  if(!name||!currentEventId) return;
+  events[currentEventId].invites.push({id:Date.now(),name,status:'pending'});
+  saveEvent(currentEventId); inp.value=''; renderInvites();
+}
+function renderInvites(){
+  const list=events[currentEventId].invites||[];
+  $('stat-invites').textContent=list.length;
+  $('stat-confirmed').textContent=list.filter(i=>i.status==='confirmed').length;
+  $('stat-declined').textContent=list.filter(i=>i.status==='declined').length;
+  $('chip-confirmed').textContent=list.filter(i=>i.status==='confirmed').length+' confirmés';
+  const lbl={pending:'⏳ Attente',confirmed:'✅ Confirmé',declined:'❌ Absent'};
+  const cls={pending:'',confirmed:'confirmed',declined:'declined'};
+  const el=$('invites-list');
+  el.innerHTML=list.length?list.map(inv=>`
+    <div class="item-row">
+      <span class="item-label">${inv.name}</span>
+      <button class="btn-status ${cls[inv.status]}" data-iid="${inv.id}">${lbl[inv.status]}</button>
+      <button class="btn-del" data-did="${inv.id}">✕</button>
+    </div>`).join(''):'<p style="color:var(--text3);font-size:13px;padding:4px 0">Aucun invité</p>';
+  el.querySelectorAll('.btn-status').forEach(b=>b.addEventListener('click',()=>{
+    const inv=events[currentEventId].invites.find(i=>i.id==b.dataset.iid);
+    if(inv){const c=['pending','confirmed','declined'];inv.status=c[(c.indexOf(inv.status)+1)%3];saveEvent(currentEventId);renderInvites();}
+  }));
+  el.querySelectorAll('.btn-del').forEach(b=>b.addEventListener('click',()=>{
+    events[currentEventId].invites=events[currentEventId].invites.filter(i=>i.id!=b.dataset.did);
+    saveEvent(currentEventId); renderInvites();
+  }));
+}
+
+// ── COURSES ──────────────────────────────────────
+function addCourse(){
+  const n=$('input-course-name').value.trim(), q=$('input-course-qty').value.trim();
+  if(!n||!currentEventId) return;
+  events[currentEventId].courses.push({id:Date.now(),name:n,qty:q,done:false});
+  saveEvent(currentEventId); $('input-course-name').value=''; $('input-course-qty').value=''; renderCourses();
+}
+function generateCourses(){
+  const ev=events[currentEventId];
+  (AUTO_COURSES[ev.type]||AUTO_COURSES.autre).forEach(name=>{
+    if(!ev.courses.find(c=>c.name===name)) ev.courses.push({id:Date.now()+Math.random(),name,qty:'',done:false});
+  });
+  saveEvent(currentEventId); renderCourses(); showToast('Liste générée ✨');
+}
+function renderCourses(){
+  const list=events[currentEventId].courses||[];
+  const el=$('courses-list');
+  el.innerHTML=list.length?list.map(c=>`
+    <div class="item-row${c.done?' done':''}">
+      <button class="check-box${c.done?' done':''}" data-cid="${c.id}">${c.done?'✓':''}</button>
+      <div style="flex:1"><div class="item-label">${c.name}</div>${c.qty?`<div class="item-sub">${c.qty}</div>`:''}</div>
+      <button class="btn-del" data-cdel="${c.id}">✕</button>
+    </div>`).join(''):'<p style="color:var(--text3);font-size:13px;padding:4px 0">Aucun article</p>';
+  el.querySelectorAll('.check-box').forEach(b=>b.addEventListener('click',()=>{
+    const c=events[currentEventId].courses.find(x=>x.id==b.dataset.cid);
+    if(c){c.done=!c.done;saveEvent(currentEventId);renderCourses();}
+  }));
+  el.querySelectorAll('[data-cdel]').forEach(b=>b.addEventListener('click',()=>{
+    events[currentEventId].courses=events[currentEventId].courses.filter(c=>c.id!=b.dataset.cdel);
+    saveEvent(currentEventId); renderCourses();
+  }));
+}
+
+// ── BUDGET ───────────────────────────────────────
+function addDepense(){
+  const label=$('input-depense-label').value.trim(), amount=parseFloat($('input-depense-amount').value)||0;
+  if(!label||!amount||!currentEventId) return;
+  events[currentEventId].depenses=events[currentEventId].depenses||[];
+  events[currentEventId].depenses.push({id:Date.now(),label,amount});
+  saveEvent(currentEventId); $('input-depense-label').value=''; $('input-depense-amount').value='';
+  renderDepenses(); updateBudgetUI();
+}
+function renderDepenses(){
+  const list=events[currentEventId].depenses||[];
+  const el=$('depenses-list');
+  el.innerHTML=list.length?list.map(d=>`
+    <div class="item-row">
+      <span class="item-label">${d.label}</span>
+      <span class="depense-amount">${d.amount.toFixed(2)}€</span>
+      <button class="btn-del" data-ddel="${d.id}">✕</button>
+    </div>`).join(''):'<p style="color:var(--text3);font-size:13px;padding:4px 0">Aucune dépense</p>';
+  el.querySelectorAll('[data-ddel]').forEach(b=>b.addEventListener('click',()=>{
+    events[currentEventId].depenses=events[currentEventId].depenses.filter(d=>d.id!=b.dataset.ddel);
+    saveEvent(currentEventId); renderDepenses(); updateBudgetUI();
+  }));
+}
+function updateBudgetUI(){
+  const ev=events[currentEventId];
+  const total=parseFloat(ev.budget?.total)||0;
+  const spent=(ev.depenses||[]).reduce((s,d)=>s+d.amount,0);
+  const pct=total>0?Math.min(spent/total,1):0;
+  $('budget-spent-display').textContent=spent.toFixed(0)+'€';
+  $('budget-total-display').textContent=total.toFixed(0)+'€';
+  $('input-budget-total').value=total||'';
+  $('budget-arc-fill').style.strokeDashoffset=157-pct*157;
+  $('budget-arc-fill').style.stroke=pct>=1?'#f87171':'url(#arcGrad)';
+}
+
+// ── CHECKLIST ────────────────────────────────────
+function addCheckItem(){
+  const text=$('input-check-item').value.trim();
+  if(!text||!currentEventId) return;
+  events[currentEventId].checklist.push({id:Date.now(),text,done:false});
+  saveEvent(currentEventId); $('input-check-item').value=''; renderChecklist();
+}
+function generateChecklist(){
+  const ev=events[currentEventId];
+  (AUTO_CHECKLIST[ev.type]||AUTO_CHECKLIST.autre).forEach(text=>{
+    if(!ev.checklist.find(c=>c.text===text)) ev.checklist.push({id:Date.now()+Math.random(),text,done:false});
+  });
+  saveEvent(currentEventId); renderChecklist(); showToast('Checklist générée ✨');
+}
+function renderChecklist(){
+  const list=events[currentEventId].checklist||[];
+  const done=list.filter(c=>c.done).length;
+  const pct=list.length?Math.round(done/list.length*100):0;
+  $('checklist-progress').style.width=pct+'%';
+  $('checklist-pct').textContent=pct+'%';
+  const el=$('checklist-list');
+  el.innerHTML=list.length?list.map(c=>`
+    <div class="item-row${c.done?' done':''}">
+      <button class="check-box${c.done?' done':''}" data-xid="${c.id}">${c.done?'✓':''}</button>
+      <span class="item-label">${c.text}</span>
+      <button class="btn-del" data-xdel="${c.id}">✕</button>
+    </div>`).join(''):'<p style="color:var(--text3);font-size:13px;padding:4px 0">Aucune tâche</p>';
+  el.querySelectorAll('.check-box').forEach(b=>b.addEventListener('click',()=>{
+    const item=events[currentEventId].checklist.find(c=>c.id==b.dataset.xid);
+    if(item){item.done=!item.done;saveEvent(currentEventId);renderChecklist();}
+  }));
+  el.querySelectorAll('[data-xdel]').forEach(b=>b.addEventListener('click',()=>{
+    events[currentEventId].checklist=events[currentEventId].checklist.filter(c=>c.id!=b.dataset.xdel);
+    saveEvent(currentEventId); renderChecklist();
+  }));
+}
+
+// ── BOOT ─────────────────────────────────────────
+async function boot(){
+  // Auth listener
+  if(auth){
+    onAuthStateChanged(auth, async user=>{
+      currentUser=user;
+      updateAuthUI(user);
+      await loadEvents();
+      renderHome();
+    });
+  } else {
+    localLoad();
+  }
+
+  // Listeners
+  $('btn-burger').addEventListener('click', openDrawer);
+  $('drawer-overlay').addEventListener('click', closeDrawer);
+  $('btn-back').addEventListener('click', ()=>navigate('home'));
+  $('fab').addEventListener('click', openCreateEvent);
+  $('btn-empty-create').addEventListener('click', openCreateEvent);
+  $('btn-create-confirm').addEventListener('click', createEvent);
+  $('btn-create-cancel').addEventListener('click', closeCreateModal);
+  $('modal-create').addEventListener('click', e=>{if(e.target===$('modal-create'))closeCreateModal();});
+  $('drawer-home').addEventListener('click', ()=>navigate('home'));
+  $('drawer-settings').addEventListener('click', ()=>navigate('settings'));
+  $('drawer-google-signin').addEventListener('click', signInGoogle);
+  $('drawer-signout').addEventListener('click', doSignOut);
+  $('btn-google-signin').addEventListener('click', signInGoogle);
+  $('btn-signout').addEventListener('click', doSignOut);
+  $('btn-add-invite').addEventListener('click', addInvite);
+  $('btn-add-course').addEventListener('click', addCourse);
+  $('btn-gen-courses').addEventListener('click', generateCourses);
+  $('btn-add-depense').addEventListener('click', addDepense);
+  $('btn-gen-checklist').addEventListener('click', generateChecklist);
+  $('btn-add-check').addEventListener('click', addCheckItem);
+  $('input-budget-total').addEventListener('input',()=>{
+    if(!currentEventId) return;
+    events[currentEventId].budget.total=parseFloat($('input-budget-total').value)||0;
+    saveEvent(currentEventId); updateBudgetUI();
+  });
+  $('input-invite-name').addEventListener('keydown',  e=>e.key==='Enter'&&addInvite());
+  $('input-course-name').addEventListener('keydown',  e=>e.key==='Enter'&&addCourse());
+  $('input-check-item').addEventListener('keydown',   e=>e.key==='Enter'&&addCheckItem());
+  $('input-depense-label').addEventListener('keydown',e=>e.key==='Enter'&&addDepense());
+  document.querySelectorAll('.type-opt').forEach(btn=>btn.addEventListener('click',()=>{
+    document.querySelectorAll('.type-opt').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  }));
+
+  // Splash out
+  setTimeout(()=>{
+    $('splash').classList.add('out');
+    setTimeout(()=>{ $('splash').style.display='none'; $('app').classList.remove('hidden'); }, 350);
+  }, 1100);
+
+  // Service Worker
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('/sw.js').then(reg=>{
+      reg.addEventListener('updatefound',()=>{
+        const w=reg.installing;
+        w.addEventListener('statechange',()=>{
+          if(w.state==='installed'&&navigator.serviceWorker.controller) window.location.reload();
+        });
+      });
+    });
+    navigator.serviceWorker.addEventListener('controllerchange',()=>window.location.reload());
+  }
+}
+
+boot();
+</script>
+</body>
+</html>  </header>
 
   <main id="pages">
     <!-- HOME -->
