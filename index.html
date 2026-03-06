@@ -560,7 +560,8 @@ function renderChecklist() {
 // ═══════════════════════════════════════════
 //  DÉMARRAGE — tout se passe ici, dans le même module
 // ═══════════════════════════════════════════
-await loadEvents();
+async function boot() {
+  await loadEvents();
 
 // Attacher TOUS les listeners ici (plus d'onclick inline)
 $('btn-add-event').addEventListener('click', openCreateEvent);
@@ -602,6 +603,8 @@ setTimeout(() => {
   renderHome();
 }, 1400);
 
+} // fin boot()
+boot();
 </script>
 
 <!-- Service Worker pour PWA -->
