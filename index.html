@@ -17,7 +17,7 @@
 </head>
 <body>
 
-<!-- SPLASH SCREEN -->
+<!-- SPLASH -->
 <div id="splash">
   <div class="splash-logo">
     <div class="splash-icon">🎉</div>
@@ -26,37 +26,31 @@
   </div>
 </div>
 
-<!-- APP SHELL -->
+<!-- APP -->
 <div id="app" class="hidden">
-
-  <!-- HEADER -->
   <header id="main-header">
     <div class="header-inner">
       <button id="btn-back" class="btn-icon hidden">←</button>
       <h1 id="header-title">nightr</h1>
-      <button id="btn-add-event" class="btn-icon" onclick="openCreateEvent()">＋</button>
+      <button id="btn-add-event" class="btn-icon">＋</button>
     </div>
   </header>
 
-  <!-- PAGES -->
   <main id="pages">
-
-    <!-- PAGE: LISTE DES ÉVÉNEMENTS -->
+    <!-- HOME -->
     <section id="page-home" class="page active">
       <div class="page-content">
-        <div class="welcome-block">
-          <p class="welcome-sub">Quelle soirée planifie-t-on ?</p>
-        </div>
+        <p class="welcome-sub">Quelle soirée planifie-t-on ?</p>
         <div id="events-list" class="events-grid"></div>
         <div id="empty-state" class="empty-state hidden">
           <div class="empty-icon">🥂</div>
           <p>Aucune soirée pour l'instant</p>
-          <button class="btn-primary" onclick="openCreateEvent()">Créer ma première soirée</button>
+          <button class="btn-primary" id="btn-empty-create">Créer ma première soirée</button>
         </div>
       </div>
     </section>
 
-    <!-- PAGE: DÉTAIL ÉVÉNEMENT -->
+    <!-- DÉTAIL -->
     <section id="page-event" class="page">
       <div class="event-hero" id="event-hero">
         <div class="event-hero-overlay"></div>
@@ -67,7 +61,6 @@
           <p id="event-lieu-display" class="event-meta"></p>
         </div>
       </div>
-
       <div class="tabs-bar">
         <button class="tab-btn active" data-tab="invites">👥 Invités</button>
         <button class="tab-btn" data-tab="courses">🛒 Courses</button>
@@ -75,47 +68,38 @@
         <button class="tab-btn" data-tab="checklist">✅ Checklist</button>
       </div>
 
-      <!-- TAB: INVITÉS -->
+      <!-- INVITÉS -->
       <div id="tab-invites" class="tab-content active">
         <div class="tab-inner">
           <div class="stats-row">
-            <div class="stat-card">
-              <span class="stat-num" id="stat-invites">0</span>
-              <span class="stat-label">Invités</span>
-            </div>
-            <div class="stat-card confirmed">
-              <span class="stat-num" id="stat-confirmed">0</span>
-              <span class="stat-label">Confirmés</span>
-            </div>
-            <div class="stat-card declined">
-              <span class="stat-num" id="stat-declined">0</span>
-              <span class="stat-label">Absents</span>
-            </div>
+            <div class="stat-card"><span class="stat-num" id="stat-invites">0</span><span class="stat-label">Invités</span></div>
+            <div class="stat-card confirmed"><span class="stat-num" id="stat-confirmed">0</span><span class="stat-label">Confirmés</span></div>
+            <div class="stat-card declined"><span class="stat-num" id="stat-declined">0</span><span class="stat-label">Absents</span></div>
           </div>
           <div class="add-row">
             <input type="text" id="input-invite-name" placeholder="Prénom ou nom…" class="input-field" />
-            <button class="btn-add" onclick="addInvite()">＋</button>
+            <button class="btn-add" id="btn-add-invite">＋</button>
           </div>
           <div id="invites-list" class="item-list"></div>
         </div>
       </div>
 
-      <!-- TAB: COURSES -->
+      <!-- COURSES -->
       <div id="tab-courses" class="tab-content">
         <div class="tab-inner">
           <div class="courses-hint">
-            <button class="btn-secondary" onclick="generateCourses()">✨ Générer une liste auto</button>
+            <button class="btn-secondary" id="btn-gen-courses">✨ Générer une liste auto</button>
           </div>
           <div class="add-row">
             <input type="text" id="input-course-name" placeholder="Article…" class="input-field" style="flex:2" />
-            <input type="text" id="input-course-qty" placeholder="Qté" class="input-field" style="flex:1; max-width:80px" />
-            <button class="btn-add" onclick="addCourse()">＋</button>
+            <input type="text" id="input-course-qty" placeholder="Qté" class="input-field" style="flex:1;max-width:80px" />
+            <button class="btn-add" id="btn-add-course">＋</button>
           </div>
           <div id="courses-list" class="item-list"></div>
         </div>
       </div>
 
-      <!-- TAB: BUDGET -->
+      <!-- BUDGET -->
       <div id="tab-budget" class="tab-content">
         <div class="tab-inner">
           <div class="budget-overview">
@@ -125,8 +109,7 @@
                 <path id="budget-arc-fill" d="M10,60 A50,50 0 0,1 110,60" fill="none" stroke="url(#arcGrad)" stroke-width="10" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="157"/>
                 <defs>
                   <linearGradient id="arcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stop-color="#f97316"/>
-                    <stop offset="100%" stop-color="#facc15"/>
+                    <stop offset="0%" stop-color="#f97316"/><stop offset="100%" stop-color="#facc15"/>
                   </linearGradient>
                 </defs>
               </svg>
@@ -137,26 +120,26 @@
             </div>
           </div>
           <div class="budget-set-row">
-            <input type="number" id="input-budget-total" placeholder="Budget total (€)" class="input-field" oninput="updateBudgetTotal()" />
+            <input type="number" id="input-budget-total" placeholder="Budget total (€)" class="input-field" />
           </div>
           <div class="add-row">
             <input type="text" id="input-depense-label" placeholder="Dépense…" class="input-field" style="flex:2" />
-            <input type="number" id="input-depense-amount" placeholder="€" class="input-field" style="flex:1; max-width:80px" />
-            <button class="btn-add" onclick="addDepense()">＋</button>
+            <input type="number" id="input-depense-amount" placeholder="€" class="input-field" style="flex:1;max-width:80px" />
+            <button class="btn-add" id="btn-add-depense">＋</button>
           </div>
           <div id="depenses-list" class="item-list"></div>
         </div>
       </div>
 
-      <!-- TAB: CHECKLIST -->
+      <!-- CHECKLIST -->
       <div id="tab-checklist" class="tab-content">
         <div class="tab-inner">
           <div class="courses-hint">
-            <button class="btn-secondary" onclick="generateChecklist()">✨ Checklist auto</button>
+            <button class="btn-secondary" id="btn-gen-checklist">✨ Checklist auto</button>
           </div>
           <div class="add-row">
             <input type="text" id="input-check-item" placeholder="Tâche à faire…" class="input-field" />
-            <button class="btn-add" onclick="addCheckItem()">＋</button>
+            <button class="btn-add" id="btn-add-check">＋</button>
           </div>
           <div class="progress-bar-wrap">
             <div class="progress-bar"><div id="checklist-progress" class="progress-fill"></div></div>
@@ -165,24 +148,20 @@
           <div id="checklist-list" class="item-list"></div>
         </div>
       </div>
-
     </section>
   </main>
 
-  <!-- BOTTOM NAV (only on home) -->
   <nav id="bottom-nav">
-    <button class="nav-btn active" onclick="navigate('home')">🏠<span>Accueil</span></button>
-    <button class="nav-btn" onclick="openCreateEvent()">🎉<span>Nouvelle</span></button>
+    <button class="nav-btn active" id="nav-home">🏠<span>Accueil</span></button>
+    <button class="nav-btn" id="nav-new">🎉<span>Nouvelle</span></button>
   </nav>
-
 </div>
 
-<!-- MODAL: CRÉER ÉVÉNEMENT -->
+<!-- MODAL CRÉER -->
 <div id="modal-create" class="modal-overlay hidden">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <h3 class="modal-title">Nouvelle soirée</h3>
-
     <label class="form-label">Type de soirée</label>
     <div id="type-selector" class="type-grid">
       <button class="type-opt active" data-type="soiree" data-emoji="🎉">🎉 Soirée</button>
@@ -192,55 +171,457 @@
       <button class="type-opt" data-type="bbq" data-emoji="🍖">🍖 BBQ</button>
       <button class="type-opt" data-type="autre" data-emoji="✨">✨ Autre</button>
     </div>
-
     <label class="form-label">Nom de la soirée</label>
     <input type="text" id="input-event-name" class="input-field" placeholder="Ex: Annif de Lucie" />
-
     <label class="form-label">Date</label>
     <input type="date" id="input-event-date" class="input-field" />
-
     <label class="form-label">Lieu</label>
     <input type="text" id="input-event-lieu" class="input-field" placeholder="Adresse ou nom du lieu" />
-
-    <button class="btn-primary full" onclick="createEvent()">Créer la soirée 🎊</button>
-    <button class="btn-ghost full" onclick="closeModal('modal-create')">Annuler</button>
+    <button class="btn-primary full" id="btn-create-confirm">Créer la soirée 🎊</button>
+    <button class="btn-ghost full" id="btn-create-cancel">Annuler</button>
   </div>
 </div>
 
 <!-- TOAST -->
 <div id="toast" class="toast hidden"></div>
 
-<!-- FIREBASE -->
+<!-- TOUT EN UN SEUL MODULE : Firebase + App -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import {
-    getFirestore, collection, doc,
-    setDoc, deleteDoc, getDocs
-  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+// ═══════════════════════════════════════════
+//  FIREBASE
+// ═══════════════════════════════════════════
+import { initializeApp }                          from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, doc, setDoc, deleteDoc, getDocs }
+                                                  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  // 👉 Remplace ces valeurs par ta config Firebase
-  // Tant que non configuré, l'app fonctionne en localStorage
-  const firebaseConfig = {
-    apiKey:            "AIzaSyCR3A1Rfd08MdnSAVKcMFZh1mApCnt_dL0",
-    authDomain:        "nightr-48fd7.firebaseapp.com",
-    projectId:         "nightr-48fd7",
-    storageBucket:     "nightr-48fd7.firebasestorage.app",
-    messagingSenderId: "781987170518",
-    appId:             "1:781987170518:web:5b49f4958b0ac313e1a177"
-  };
+const firebaseConfig = {
+  apiKey:            "AIzaSyCR3A1Rfd08MdnSAVKcMFZh1mApCnt_dL0",
+  authDomain:        "nightr-48fd7.firebaseapp.com",
+  projectId:         "nightr-48fd7",
+  storageBucket:     "nightr-48fd7.firebasestorage.app",
+  messagingSenderId: "781987170518",
+  appId:             "1:781987170518:web:5b49f4958b0ac313e1a177"
+};
 
-  try {
-    if (true) {
-      const app = initializeApp(firebaseConfig);
-      window.__db = getFirestore(app);
-      // Expose les fonctions Firestore pour app.js (qui n'est pas un module)
-      window.__fs = { collection, doc, setDoc, deleteDoc, getDocs };
-    }
-  } catch(e) {
-    console.warn("Firebase init failed, mode local activé", e);
+let db = null;
+try {
+  const app = initializeApp(firebaseConfig);
+  db = getFirestore(app);
+} catch(e) { console.warn("Firebase KO, mode local", e); }
+
+// ═══════════════════════════════════════════
+//  DONNÉES
+// ═══════════════════════════════════════════
+let events = {};
+let currentEventId = null;
+
+const TYPE_COLORS = {
+  soiree:       ['#f97316','#a855f7'],
+  anniversaire: ['#ec4899','#f97316'],
+  cremaillere:  ['#22d3ee','#4ade80'],
+  mariage:      ['#facc15','#f9a8d4'],
+  bbq:          ['#f97316','#ef4444'],
+  autre:        ['#a855f7','#22d3ee'],
+};
+const AUTO_COURSES = {
+  soiree:       ['Boissons alcoolisées','Sodas / Jus','Chips / Apéro','Glace & glaçons','Verres / Gobelets','Serviettes'],
+  anniversaire: ["Gâteau d'anniversaire",'Bougies','Boissons','Chips / Apéro','Assiettes','Décorations'],
+  cremaillere:  ['Boissons','Fromages & charcuterie','Pain','Champagne','Verres','Fleurs'],
+  mariage:      ['Champagne','Vin rouge/blanc','Eau minérale','Sodas','Canapés','Pièce montée'],
+  bbq:          ['Viandes & saucisses','Légumes à griller','Pain','Sauces','Charbon','Assiettes'],
+  autre:        ['Boissons','Grignotage','Vaisselle jetable','Serviettes'],
+};
+const AUTO_CHECKLIST = {
+  soiree:       ['Préparer la playlist','Acheter les boissons','Ranger / Nettoyer','Préparer la déco','Prévenir les voisins','Sortir les poubelles après'],
+  anniversaire: ['Commander / Préparer le gâteau','Acheter les bougies','Préparer la déco','Prévoir un cadeau','Envoyer les invitations','Prévoir une surprise'],
+  cremaillere:  ['Acheter les boissons','Nettoyer le logement',"Préparer l'apéro",'Prévoir stationnement','Allumer les bougies / Ambiance'],
+  mariage:      ['Confirmer le traiteur','Vérifier la salle','Playlist cérémonie','Playlist soirée','Plan de table','Fleurs & déco'],
+  bbq:          ['Allumer le barbecue','Mariner les viandes','Préparer les salades','Vérifier le gaz / charbon','Prévoir une zone ombre'],
+  autre:        ['Envoyer les invitations','Préparer le lieu','Faire les courses','Décoration'],
+};
+
+// ═══════════════════════════════════════════
+//  FIREBASE / LOCAL STORAGE
+// ═══════════════════════════════════════════
+function localSave() {
+  try { localStorage.setItem('nightr_events', JSON.stringify(events)); } catch(e){}
+}
+function localLoad() {
+  try { const d = localStorage.getItem('nightr_events'); if (d) events = JSON.parse(d); } catch(e){}
+}
+async function saveEvent(id) {
+  localSave();
+  if (!db) return;
+  try { await setDoc(doc(collection(db,'events'), id), events[id]); } catch(e){ console.warn(e); }
+}
+async function deleteEventDB(id) {
+  localSave();
+  if (!db) return;
+  try { await deleteDoc(doc(collection(db,'events'), id)); } catch(e){ console.warn(e); }
+}
+async function loadEvents() {
+  if (db) {
+    try {
+      const snap = await getDocs(collection(db,'events'));
+      events = {};
+      snap.forEach(d => { events[d.id] = d.data(); });
+      return;
+    } catch(e) { console.warn('Firestore load KO, fallback local', e); }
   }
-  window.dispatchEvent(new Event("firebase-ready"));
+  localLoad();
+}
+
+// ═══════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+function $(id) { return document.getElementById(id); }
+
+// ═══════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════
+function navigate(page, eventId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  $('page-' + page).classList.add('active');
+  if (page === 'home') {
+    $('btn-back').classList.add('hidden');
+    $('btn-add-event').classList.remove('hidden');
+    $('bottom-nav').classList.remove('hidden');
+    $('header-title').textContent = 'nightr';
+    currentEventId = null;
+    renderHome();
+  } else {
+    $('btn-back').classList.remove('hidden');
+    $('btn-add-event').classList.add('hidden');
+    $('bottom-nav').classList.add('hidden');
+    currentEventId = eventId;
+    $('header-title').textContent = events[eventId].name;
+    renderEventDetail(eventId);
+  }
+}
+
+// ═══════════════════════════════════════════
+//  HOME
+// ═══════════════════════════════════════════
+function renderHome() {
+  const list = $('events-list');
+  const empty = $('empty-state');
+  const ids = Object.keys(events);
+  if (ids.length === 0) {
+    list.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  list.innerHTML = ids.map((id, i) => {
+    const ev = events[id];
+    const confirmed = (ev.invites||[]).filter(g=>g.status==='confirmed').length;
+    const total = (ev.invites||[]).length;
+    const dateStr = ev.date ? new Date(ev.date).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}) : '';
+    return `
+    <div class="event-card" data-id="${id}" style="animation-delay:${i*0.07}s">
+      <div class="event-card-actions">
+        <button class="btn-delete-card" data-del="${id}">🗑</button>
+      </div>
+      <div class="event-card-header">
+        <span class="event-card-emoji">${ev.emoji}</span>
+        <div class="event-card-info">
+          <h3>${ev.name}</h3>
+          <p>${dateStr}${ev.lieu?' · '+ev.lieu:''}</p>
+        </div>
+      </div>
+      <div class="event-card-chips">
+        ${total>0?`<span class="chip green">👥 ${confirmed}/${total} confirmés</span>`:''}
+        ${ev.budget?.total?`<span class="chip orange">💸 ${ev.budget.total}€ budget</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+
+  // Listeners cards (délégation)
+  list.querySelectorAll('.event-card').forEach(card => {
+    card.addEventListener('click', () => navigate('event', card.dataset.id));
+  });
+  list.querySelectorAll('.btn-delete-card').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const id = btn.dataset.del;
+      if (confirm(`Supprimer "${events[id]?.name}" ?`)) {
+        deleteEventDB(id);
+        delete events[id];
+        renderHome();
+        showToast('Soirée supprimée');
+      }
+    });
+  });
+}
+
+// ═══════════════════════════════════════════
+//  MODAL CRÉER
+// ═══════════════════════════════════════════
+function openCreateEvent() {
+  $('modal-create').classList.remove('hidden');
+}
+function closeCreateModal() {
+  $('modal-create').classList.add('hidden');
+}
+function createEvent() {
+  const name = $('input-event-name').value.trim();
+  const date = $('input-event-date').value;
+  const lieu = $('input-event-lieu').value.trim();
+  const activeType = document.querySelector('.type-opt.active');
+  const type  = activeType?.dataset.type  || 'soiree';
+  const emoji = activeType?.dataset.emoji || '🎉';
+  if (!name) { showToast('Donne un nom à ta soirée 🎉'); return; }
+  const id = 'ev_' + Date.now();
+  events[id] = { id, name, date, lieu, type, emoji, invites:[], courses:[], depenses:[], checklist:[], budget:{total:0}, createdAt:Date.now() };
+  saveEvent(id);
+  closeCreateModal();
+  $('input-event-name').value = '';
+  $('input-event-date').value = '';
+  $('input-event-lieu').value = '';
+  showToast('Soirée créée ! 🥂');
+  setTimeout(() => navigate('event', id), 300);
+}
+
+// ═══════════════════════════════════════════
+//  DÉTAIL
+// ═══════════════════════════════════════════
+function renderEventDetail(id) {
+  const ev = events[id];
+  const colors = TYPE_COLORS[ev.type] || TYPE_COLORS.autre;
+  $('event-hero').style.background = `linear-gradient(135deg,${colors[0]},${colors[1]})`;
+  $('event-type-badge').textContent = ev.emoji + ' ' + ev.type;
+  $('event-name-display').textContent = ev.name;
+  $('event-date-display').textContent = ev.date
+    ? '📅 ' + new Date(ev.date).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
+    : '';
+  $('event-lieu-display').textContent = ev.lieu ? '📍 ' + ev.lieu : '';
+  switchTab('invites');
+  renderInvites(); renderCourses(); renderDepenses(); renderChecklist(); updateBudgetUI();
+}
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab===tab));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id==='tab-'+tab));
+}
+
+// ═══════════════════════════════════════════
+//  INVITÉS
+// ═══════════════════════════════════════════
+function addInvite() {
+  const input = $('input-invite-name');
+  const name = input.value.trim();
+  if (!name || !currentEventId) return;
+  events[currentEventId].invites.push({id:Date.now(), name, status:'pending'});
+  saveEvent(currentEventId); input.value = ''; renderInvites();
+}
+function renderInvites() {
+  const ev = events[currentEventId];
+  const list = ev.invites || [];
+  $('stat-invites').textContent = list.length;
+  $('stat-confirmed').textContent = list.filter(i=>i.status==='confirmed').length;
+  $('stat-declined').textContent  = list.filter(i=>i.status==='declined').length;
+  const lbl = {pending:'⏳ En attente', confirmed:'✅ Confirmé', declined:'❌ Absent'};
+  const cls = {pending:'', confirmed:'confirmed', declined:'declined'};
+  const el = $('invites-list');
+  el.innerHTML = list.length ? list.map(inv=>`
+    <div class="item-row">
+      <span class="item-row-label">${inv.name}</span>
+      <button class="btn-status ${cls[inv.status]}" data-iid="${inv.id}">${lbl[inv.status]}</button>
+      <button class="btn-delete" data-did="${inv.id}">✕</button>
+    </div>`).join('') : '<p style="color:var(--text-muted);font-size:14px;padding:10px 0">Aucun invité pour l\'instant</p>';
+  el.querySelectorAll('.btn-status').forEach(b => b.addEventListener('click', () => {
+    const inv = events[currentEventId].invites.find(i=>i.id==b.dataset.iid);
+    if (inv) { const c=['pending','confirmed','declined']; inv.status=c[(c.indexOf(inv.status)+1)%3]; saveEvent(currentEventId); renderInvites(); }
+  }));
+  el.querySelectorAll('.btn-delete').forEach(b => b.addEventListener('click', () => {
+    events[currentEventId].invites = events[currentEventId].invites.filter(i=>i.id!=b.dataset.did);
+    saveEvent(currentEventId); renderInvites();
+  }));
+}
+
+// ═══════════════════════════════════════════
+//  COURSES
+// ═══════════════════════════════════════════
+function addCourse() {
+  const n = $('input-course-name').value.trim();
+  const q = $('input-course-qty').value.trim();
+  if (!n || !currentEventId) return;
+  events[currentEventId].courses.push({id:Date.now(), name:n, qty:q, done:false});
+  saveEvent(currentEventId); $('input-course-name').value=''; $('input-course-qty').value=''; renderCourses();
+}
+function generateCourses() {
+  const ev = events[currentEventId];
+  (AUTO_COURSES[ev.type]||AUTO_COURSES.autre).forEach(name => {
+    if (!ev.courses.find(c=>c.name===name)) ev.courses.push({id:Date.now()+Math.random(), name, qty:'', done:false});
+  });
+  saveEvent(currentEventId); renderCourses(); showToast('Liste générée ✨');
+}
+function renderCourses() {
+  const list = events[currentEventId].courses || [];
+  const el = $('courses-list');
+  el.innerHTML = list.length ? list.map(c=>`
+    <div class="item-row${c.done?' done':''}">
+      <button class="check-box${c.done?' done':''}" data-cid="${c.id}">${c.done?'✓':''}</button>
+      <div style="flex:1"><div class="item-row-label">${c.name}</div>${c.qty?`<div class="item-row-sub">${c.qty}</div>`:''}</div>
+      <button class="btn-delete" data-cdel="${c.id}">✕</button>
+    </div>`).join('') : '<p style="color:var(--text-muted);font-size:14px;padding:10px 0">Aucun article pour l\'instant</p>';
+  el.querySelectorAll('.check-box').forEach(b => b.addEventListener('click', () => {
+    const c = events[currentEventId].courses.find(x=>x.id==b.dataset.cid);
+    if (c) { c.done=!c.done; saveEvent(currentEventId); renderCourses(); }
+  }));
+  el.querySelectorAll('[data-cdel]').forEach(b => b.addEventListener('click', () => {
+    events[currentEventId].courses = events[currentEventId].courses.filter(c=>c.id!=b.dataset.cdel);
+    saveEvent(currentEventId); renderCourses();
+  }));
+}
+
+// ═══════════════════════════════════════════
+//  BUDGET
+// ═══════════════════════════════════════════
+function addDepense() {
+  const label = $('input-depense-label').value.trim();
+  const amount = parseFloat($('input-depense-amount').value)||0;
+  if (!label||!amount||!currentEventId) return;
+  events[currentEventId].depenses = events[currentEventId].depenses||[];
+  events[currentEventId].depenses.push({id:Date.now(), label, amount});
+  saveEvent(currentEventId); $('input-depense-label').value=''; $('input-depense-amount').value='';
+  renderDepenses(); updateBudgetUI();
+}
+function renderDepenses() {
+  const list = events[currentEventId].depenses||[];
+  const el = $('depenses-list');
+  el.innerHTML = list.length ? list.map(d=>`
+    <div class="item-row">
+      <span class="item-row-label">${d.label}</span>
+      <span class="depense-amount">${d.amount.toFixed(2)}€</span>
+      <button class="btn-delete" data-ddel="${d.id}">✕</button>
+    </div>`).join('') : '<p style="color:var(--text-muted);font-size:14px;padding:10px 0">Aucune dépense pour l\'instant</p>';
+  el.querySelectorAll('[data-ddel]').forEach(b => b.addEventListener('click', () => {
+    events[currentEventId].depenses = events[currentEventId].depenses.filter(d=>d.id!=b.dataset.ddel);
+    saveEvent(currentEventId); renderDepenses(); updateBudgetUI();
+  }));
+}
+function updateBudgetUI() {
+  const ev = events[currentEventId];
+  const total = parseFloat(ev.budget?.total)||0;
+  const spent = (ev.depenses||[]).reduce((s,d)=>s+d.amount,0);
+  const pct = total>0 ? Math.min(spent/total,1) : 0;
+  $('budget-spent-display').textContent = spent.toFixed(0)+'€';
+  $('budget-total-display').textContent = total.toFixed(0)+'€';
+  $('input-budget-total').value = total||'';
+  $('budget-arc-fill').style.strokeDashoffset = 157 - pct*157;
+  $('budget-arc-fill').style.stroke = pct>=1 ? '#f87171' : 'url(#arcGrad)';
+}
+
+// ═══════════════════════════════════════════
+//  CHECKLIST
+// ═══════════════════════════════════════════
+function addCheckItem() {
+  const text = $('input-check-item').value.trim();
+  if (!text||!currentEventId) return;
+  events[currentEventId].checklist.push({id:Date.now(), text, done:false});
+  saveEvent(currentEventId); $('input-check-item').value=''; renderChecklist();
+}
+function generateChecklist() {
+  const ev = events[currentEventId];
+  (AUTO_CHECKLIST[ev.type]||AUTO_CHECKLIST.autre).forEach(text => {
+    if (!ev.checklist.find(c=>c.text===text)) ev.checklist.push({id:Date.now()+Math.random(), text, done:false});
+  });
+  saveEvent(currentEventId); renderChecklist(); showToast('Checklist générée ✨');
+}
+function renderChecklist() {
+  const list = events[currentEventId].checklist||[];
+  const done = list.filter(c=>c.done).length;
+  const pct = list.length>0 ? Math.round(done/list.length*100) : 0;
+  $('checklist-progress').style.width = pct+'%';
+  $('checklist-pct').textContent = pct+'%';
+  const el = $('checklist-list');
+  el.innerHTML = list.length ? list.map(c=>`
+    <div class="item-row${c.done?' done':''}">
+      <button class="check-box${c.done?' done':''}" data-xid="${c.id}">${c.done?'✓':''}</button>
+      <span class="item-row-label">${c.text}</span>
+      <button class="btn-delete" data-xdel="${c.id}">✕</button>
+    </div>`).join('') : '<p style="color:var(--text-muted);font-size:14px;padding:10px 0">Aucune tâche pour l\'instant</p>';
+  el.querySelectorAll('.check-box').forEach(b => b.addEventListener('click', () => {
+    const item = events[currentEventId].checklist.find(c=>c.id==b.dataset.xid);
+    if (item) { item.done=!item.done; saveEvent(currentEventId); renderChecklist(); }
+  }));
+  el.querySelectorAll('[data-xdel]').forEach(b => b.addEventListener('click', () => {
+    events[currentEventId].checklist = events[currentEventId].checklist.filter(c=>c.id!=b.dataset.xdel);
+    saveEvent(currentEventId); renderChecklist();
+  }));
+}
+
+// ═══════════════════════════════════════════
+//  DÉMARRAGE — tout se passe ici, dans le même module
+// ═══════════════════════════════════════════
+await loadEvents();
+
+// Attacher TOUS les listeners ici (plus d'onclick inline)
+$('btn-add-event').addEventListener('click', openCreateEvent);
+$('nav-home').addEventListener('click', () => navigate('home'));
+$('nav-new').addEventListener('click', openCreateEvent);
+$('btn-empty-create').addEventListener('click', openCreateEvent);
+$('btn-back').addEventListener('click', () => navigate('home'));
+$('btn-create-confirm').addEventListener('click', createEvent);
+$('btn-create-cancel').addEventListener('click', closeCreateModal);
+$('modal-create').addEventListener('click', e => { if (e.target === $('modal-create')) closeCreateModal(); });
+$('btn-add-invite').addEventListener('click', addInvite);
+$('btn-add-course').addEventListener('click', addCourse);
+$('btn-gen-courses').addEventListener('click', generateCourses);
+$('btn-add-depense').addEventListener('click', addDepense);
+$('btn-gen-checklist').addEventListener('click', generateChecklist);
+$('btn-add-check').addEventListener('click', addCheckItem);
+$('input-budget-total').addEventListener('input', () => {
+  events[currentEventId].budget.total = parseFloat($('input-budget-total').value)||0;
+  saveEvent(currentEventId); updateBudgetUI();
+});
+$('input-invite-name').addEventListener('keydown', e => e.key==='Enter' && addInvite());
+$('input-course-name').addEventListener('keydown', e => e.key==='Enter' && addCourse());
+$('input-check-item').addEventListener('keydown',  e => e.key==='Enter' && addCheckItem());
+$('input-depense-label').addEventListener('keydown', e => e.key==='Enter' && addDepense());
+document.querySelectorAll('.type-opt').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.type-opt').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+
+// Splash → app
+setTimeout(() => {
+  $('splash').style.display = 'none';
+  $('app').classList.remove('hidden');
+  renderHome();
+}, 1400);
+
 </script>
-<script src="app.js"></script>
+
+<!-- Service Worker pour PWA -->
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/sw.js").then(reg => {
+      // Vérifie si une mise à jour est dispo dès l'ouverture
+      reg.addEventListener("updatefound", () => {
+        const newWorker = reg.installing;
+        newWorker.addEventListener("statechange", () => {
+          if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+            // Nouveau contenu dispo → recharge automatiquement
+            window.location.reload();
+          }
+        });
+      });
+    });
+    // Si le SW a pris le contrôle (après update) → recharge
+    navigator.serviceWorker.addEventListener("controllerchange", () => window.location.reload());
+  }
+</script>
 </body>
 </html>
