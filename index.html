@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Nightr" />
+  <meta name="theme-color" content="#0d0d1a" />
+  <title>Nightr</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- SPLASH SCREEN -->
+<div id="splash">
+  <div class="splash-logo">
+    <div class="splash-icon">🎉</div>
+    <h1>nightr</h1>
+    <p>Tes soirées, organisées.</p>
+  </div>
+</div>
+
+<!-- APP SHELL -->
+<div id="app" class="hidden">
+
+  <!-- HEADER -->
+  <header id="main-header">
+    <div class="header-inner">
+      <button id="btn-back" class="btn-icon hidden">←</button>
+      <h1 id="header-title">nightr</h1>
+      <button id="btn-add-event" class="btn-icon" onclick="openCreateEvent()">＋</button>
+    </div>
+  </header>
+
+  <!-- PAGES -->
+  <main id="pages">
+
+    <!-- PAGE: LISTE DES ÉVÉNEMENTS -->
+    <section id="page-home" class="page active">
+      <div class="page-content">
+        <div class="welcome-block">
+          <p class="welcome-sub">Quelle soirée planifie-t-on ?</p>
+        </div>
+        <div id="events-list" class="events-grid"></div>
+        <div id="empty-state" class="empty-state hidden">
+          <div class="empty-icon">🥂</div>
+          <p>Aucune soirée pour l'instant</p>
+          <button class="btn-primary" onclick="openCreateEvent()">Créer ma première soirée</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE: DÉTAIL ÉVÉNEMENT -->
+    <section id="page-event" class="page">
+      <div class="event-hero" id="event-hero">
+        <div class="event-hero-overlay"></div>
+        <div class="event-hero-content">
+          <span id="event-type-badge" class="type-badge"></span>
+          <h2 id="event-name-display"></h2>
+          <p id="event-date-display" class="event-meta"></p>
+          <p id="event-lieu-display" class="event-meta"></p>
+        </div>
+      </div>
+
+      <div class="tabs-bar">
+        <button class="tab-btn active" data-tab="invites">👥 Invités</button>
+        <button class="tab-btn" data-tab="courses">🛒 Courses</button>
+        <button class="tab-btn" data-tab="budget">💸 Budget</button>
+        <button class="tab-btn" data-tab="checklist">✅ Checklist</button>
+      </div>
+
+      <!-- TAB: INVITÉS -->
+      <div id="tab-invites" class="tab-content active">
+        <div class="tab-inner">
+          <div class="stats-row">
+            <div class="stat-card">
+              <span class="stat-num" id="stat-invites">0</span>
+              <span class="stat-label">Invités</span>
+            </div>
+            <div class="stat-card confirmed">
+              <span class="stat-num" id="stat-confirmed">0</span>
+              <span class="stat-label">Confirmés</span>
+            </div>
+            <div class="stat-card declined">
+              <span class="stat-num" id="stat-declined">0</span>
+              <span class="stat-label">Absents</span>
+            </div>
+          </div>
+          <div class="add-row">
+            <input type="text" id="input-invite-name" placeholder="Prénom ou nom…" class="input-field" />
+            <button class="btn-add" onclick="addInvite()">＋</button>
+          </div>
+          <div id="invites-list" class="item-list"></div>
+        </div>
+      </div>
+
+      <!-- TAB: COURSES -->
+      <div id="tab-courses" class="tab-content">
+        <div class="tab-inner">
+          <div class="courses-hint">
+            <button class="btn-secondary" onclick="generateCourses()">✨ Générer une liste auto</button>
+          </div>
+          <div class="add-row">
+            <input type="text" id="input-course-name" placeholder="Article…" class="input-field" style="flex:2" />
+            <input type="text" id="input-course-qty" placeholder="Qté" class="input-field" style="flex:1; max-width:80px" />
+            <button class="btn-add" onclick="addCourse()">＋</button>
+          </div>
+          <div id="courses-list" class="item-list"></div>
+        </div>
+      </div>
+
+      <!-- TAB: BUDGET -->
+      <div id="tab-budget" class="tab-content">
+        <div class="tab-inner">
+          <div class="budget-overview">
+            <div class="budget-arc-wrap">
+              <svg viewBox="0 0 120 70" class="budget-arc">
+                <path d="M10,60 A50,50 0 0,1 110,60" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="10" stroke-linecap="round"/>
+                <path id="budget-arc-fill" d="M10,60 A50,50 0 0,1 110,60" fill="none" stroke="url(#arcGrad)" stroke-width="10" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="157"/>
+                <defs>
+                  <linearGradient id="arcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#f97316"/>
+                    <stop offset="100%" stop-color="#facc15"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div class="budget-center">
+                <span id="budget-spent-display">0€</span>
+                <small>/ <span id="budget-total-display">0€</span></small>
+              </div>
+            </div>
+          </div>
+          <div class="budget-set-row">
+            <input type="number" id="input-budget-total" placeholder="Budget total (€)" class="input-field" oninput="updateBudgetTotal()" />
+          </div>
+          <div class="add-row">
+            <input type="text" id="input-depense-label" placeholder="Dépense…" class="input-field" style="flex:2" />
+            <input type="number" id="input-depense-amount" placeholder="€" class="input-field" style="flex:1; max-width:80px" />
+            <button class="btn-add" onclick="addDepense()">＋</button>
+          </div>
+          <div id="depenses-list" class="item-list"></div>
+        </div>
+      </div>
+
+      <!-- TAB: CHECKLIST -->
+      <div id="tab-checklist" class="tab-content">
+        <div class="tab-inner">
+          <div class="courses-hint">
+            <button class="btn-secondary" onclick="generateChecklist()">✨ Checklist auto</button>
+          </div>
+          <div class="add-row">
+            <input type="text" id="input-check-item" placeholder="Tâche à faire…" class="input-field" />
+            <button class="btn-add" onclick="addCheckItem()">＋</button>
+          </div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar"><div id="checklist-progress" class="progress-fill"></div></div>
+            <span id="checklist-pct">0%</span>
+          </div>
+          <div id="checklist-list" class="item-list"></div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- BOTTOM NAV (only on home) -->
+  <nav id="bottom-nav">
+    <button class="nav-btn active" onclick="navigate('home')">🏠<span>Accueil</span></button>
+    <button class="nav-btn" onclick="openCreateEvent()">🎉<span>Nouvelle</span></button>
+  </nav>
+
+</div>
+
+<!-- MODAL: CRÉER ÉVÉNEMENT -->
+<div id="modal-create" class="modal-overlay hidden">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <h3 class="modal-title">Nouvelle soirée</h3>
+
+    <label class="form-label">Type de soirée</label>
+    <div id="type-selector" class="type-grid">
+      <button class="type-opt active" data-type="soiree" data-emoji="🎉">🎉 Soirée</button>
+      <button class="type-opt" data-type="anniversaire" data-emoji="🎂">🎂 Anniversaire</button>
+      <button class="type-opt" data-type="cremaillere" data-emoji="🏠">🏠 Crémaillère</button>
+      <button class="type-opt" data-type="mariage" data-emoji="💍">💍 Mariage</button>
+      <button class="type-opt" data-type="bbq" data-emoji="🍖">🍖 BBQ</button>
+      <button class="type-opt" data-type="autre" data-emoji="✨">✨ Autre</button>
+    </div>
+
+    <label class="form-label">Nom de la soirée</label>
+    <input type="text" id="input-event-name" class="input-field" placeholder="Ex: Annif de Lucie" />
+
+    <label class="form-label">Date</label>
+    <input type="date" id="input-event-date" class="input-field" />
+
+    <label class="form-label">Lieu</label>
+    <input type="text" id="input-event-lieu" class="input-field" placeholder="Adresse ou nom du lieu" />
+
+    <button class="btn-primary full" onclick="createEvent()">Créer la soirée 🎊</button>
+    <button class="btn-ghost full" onclick="closeModal('modal-create')">Annuler</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast hidden"></div>
+
+<!-- FIREBASE -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getFirestore, collection, doc,
+    setDoc, deleteDoc, getDocs
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // 👉 Remplace ces valeurs par ta config Firebase
+  // Tant que non configuré, l'app fonctionne en localStorage
+  const firebaseConfig = {
+    apiKey:            "REMPLACE_MOI",
+    authDomain:        "REMPLACE_MOI.firebaseapp.com",
+    projectId:         "REMPLACE_MOI",
+    storageBucket:     "REMPLACE_MOI.appspot.com",
+    messagingSenderId: "REMPLACE_MOI",
+    appId:             "REMPLACE_MOI"
+  };
+
+  try {
+    if (firebaseConfig.apiKey !== "REMPLACE_MOI") {
+      const app = initializeApp(firebaseConfig);
+      window.__db = getFirestore(app);
+      // Expose les fonctions Firestore pour app.js (qui n'est pas un module)
+      window.__fs = { collection, doc, setDoc, deleteDoc, getDocs };
+    }
+  } catch(e) {
+    console.warn("Firebase init failed, mode local activé", e);
+  }
+  window.dispatchEvent(new Event("firebase-ready"));
+</script>
+<script src="app.js"></script>
+</body>
+</html>
